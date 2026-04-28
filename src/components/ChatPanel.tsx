@@ -39,7 +39,7 @@ export default function ChatPanel({
       : 'e.g., "change the background to a beach at sunset"';
 
   return (
-    <div className="flex h-full min-h-0 flex-col border-l border-neutral-800 bg-neutral-950 text-neutral-100">
+    <div className="flex h-full min-h-0 flex-col border-t border-neutral-800 bg-neutral-950 text-neutral-100 md:border-l md:border-t-0">
       <div className="flex items-center gap-2 border-b border-neutral-800 px-4 py-3 text-sm font-medium">
         Edits
         {maskActive && (
@@ -123,7 +123,7 @@ export default function ChatPanel({
         </div>
       )}
 
-      <div className="border-t border-neutral-800 p-3">
+      <div className="border-t border-neutral-800 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
         <textarea
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
@@ -135,7 +135,7 @@ export default function ChatPanel({
           }}
           placeholder={placeholder}
           disabled={!hasImage || loading}
-          rows={3}
+          rows={2}
           className="w-full resize-none rounded-md bg-neutral-900 px-3 py-2 text-sm placeholder-neutral-600 ring-1 ring-neutral-800 focus:outline-none focus:ring-neutral-600 disabled:opacity-50"
         />
         <button

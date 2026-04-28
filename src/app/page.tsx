@@ -153,7 +153,7 @@ export default function Home() {
   }
 
   return (
-    <div className="flex h-screen w-screen flex-col bg-neutral-950">
+    <div className="flex h-[100dvh] w-screen flex-col bg-neutral-950">
       <Toolbar
         hasImage={hasImage}
         canUndo={canUndo}
@@ -173,7 +173,7 @@ export default function Home() {
         }}
       />
 
-      <div className="grid min-h-0 flex-1 grid-cols-[1fr_380px] grid-rows-1">
+      <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[minmax(0,1fr)_minmax(180px,40dvh)] md:grid-cols-[1fr_380px] md:grid-rows-1">
         <div
           className="relative min-h-0"
           onDragOver={(e) => e.preventDefault()}
@@ -191,26 +191,25 @@ export default function Home() {
               />
 
               {brushEnabled ? (
-                <div className="pointer-events-none absolute inset-x-0 top-0 flex justify-center p-3">
-                  <div className="pointer-events-auto flex flex-wrap items-center gap-3 rounded-full bg-neutral-950/90 px-4 py-2 text-sm text-neutral-100 shadow-lg ring-1 ring-cyan-500/40 backdrop-blur">
-                    <span className="font-medium text-cyan-300">
+                <div className="pointer-events-none absolute inset-x-0 top-0 flex justify-center p-2 sm:p-3">
+                  <div className="pointer-events-auto flex max-w-full flex-wrap items-center justify-center gap-2 rounded-2xl bg-neutral-950/90 px-3 py-2 text-sm text-neutral-100 shadow-lg ring-1 ring-cyan-500/40 backdrop-blur sm:gap-3 sm:rounded-full sm:px-4">
+                    <span className="w-full text-center text-xs font-medium text-cyan-300 sm:w-auto sm:text-sm">
                       {hasMask
-                        ? "Looks good — describe the change on the right"
-                        : "Paint over the area you want to change"}
+                        ? "Looks good — describe the change below"
+                        : "Paint the area to change"}
                     </span>
-                    <span className="h-4 w-px bg-neutral-700" />
                     <label className="flex items-center gap-2 text-xs text-neutral-400">
-                      Brush
+                      <span className="hidden sm:inline">Brush</span>
                       <input
                         type="range"
                         min={8}
                         max={160}
                         value={brushSize}
                         onChange={(e) => setBrushSize(Number(e.target.value))}
+                        className="w-24 sm:w-32"
                       />
-                      <span className="w-8 text-right">{brushSize}</span>
+                      <span className="w-6 text-right tabular-nums">{brushSize}</span>
                     </label>
-                    <span className="h-4 w-px bg-neutral-700" />
                     <button
                       onClick={onClearMask}
                       disabled={!hasMask}
@@ -227,10 +226,10 @@ export default function Home() {
                   </div>
                 </div>
               ) : (
-                <div className="pointer-events-none absolute inset-x-0 bottom-6 flex justify-center">
+                <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center sm:bottom-6">
                   <button
                     onClick={() => setBrushEnabled(true)}
-                    className="pointer-events-auto flex items-center gap-2 rounded-full bg-cyan-500 px-5 py-2.5 text-sm font-medium text-neutral-950 shadow-lg ring-1 ring-cyan-300 hover:bg-cyan-400"
+                    className="pointer-events-auto flex items-center gap-2 rounded-full bg-cyan-500 px-4 py-2 text-sm font-medium text-neutral-950 shadow-lg ring-1 ring-cyan-300 hover:bg-cyan-400 sm:px-5 sm:py-2.5"
                   >
                     <svg
                       width="16"
@@ -252,10 +251,13 @@ export default function Home() {
               )}
             </>
           ) : (
-            <label className="flex h-full w-full cursor-pointer items-center justify-center text-neutral-400">
-              <div className="flex flex-col items-center gap-2 rounded-lg border-2 border-dashed border-neutral-700 px-12 py-16">
-                <span className="text-lg">Drop an image here</span>
-                <span className="text-xs text-neutral-500">
+            <label className="flex h-full w-full cursor-pointer items-center justify-center p-4 text-neutral-400">
+              <div className="flex flex-col items-center gap-2 rounded-lg border-2 border-dashed border-neutral-700 px-8 py-10 text-center sm:px-12 sm:py-16">
+                <span className="text-base sm:text-lg">
+                  <span className="hidden sm:inline">Drop an image here</span>
+                  <span className="sm:hidden">Tap to choose an image</span>
+                </span>
+                <span className="hidden text-xs text-neutral-500 sm:inline">
                   or click to choose a file
                 </span>
                 <input
