@@ -4,6 +4,7 @@ import { useRef, useState, type ChangeEvent, type DragEvent } from "react";
 import ImageCanvas, { type ImageCanvasHandle } from "@/components/ImageCanvas";
 import ChatPanel from "@/components/ChatPanel";
 import Toolbar from "@/components/Toolbar";
+import DownloadDialog from "@/components/DownloadDialog";
 import { useEditor, currentImage } from "@/store/editor";
 
 function dataUrlToBase64(dataUrl: string): {
@@ -39,6 +40,7 @@ export default function Home() {
   const [hasMask, setHasMask] = useState(false);
   const [selectionPreview, setSelectionPreview] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [downloadOpen, setDownloadOpen] = useState(false);
 
   function refreshPreview(active: boolean) {
     setHasMask(active);
@@ -135,10 +137,7 @@ export default function Home() {
 
   function onDownload() {
     if (!image) return;
-    const a = document.createElement("a");
-    a.href = image;
-    a.download = `edit-${Date.now()}.png`;
-    a.click();
+    setDownloadOpen(true);
   }
 
   function onClearMask() {
@@ -288,6 +287,12 @@ export default function Home() {
           onClearSelection={onClearMask}
         />
       </div>
+
+      <DownloadDialog
+        open={downloadOpen}
+        imageDataUrl={image ?? null}
+        onClose={() => setDownloadOpen(false)}
+      />
     </div>
   );
 }
