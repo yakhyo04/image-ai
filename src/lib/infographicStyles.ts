@@ -1,4 +1,4 @@
-export type InfographicStyle = "glass" | "cards";
+export type InfographicStyle = "glass" | "cards" | "ticket" | "flagship";
 
 export type InfographicStyleMeta = {
   id: InfographicStyle;
@@ -16,6 +16,16 @@ export const INFOGRAPHIC_STYLE_META: InfographicStyleMeta[] = [
     id: "cards",
     label: "4 Product Cards",
     hint: "Marketplace 2×2 grid (Wildberries / Ozon)",
+  },
+  {
+    id: "ticket",
+    label: "Ticket Stub",
+    hint: "Split-canvas editorial with ticket-design right side",
+  },
+  {
+    id: "flagship",
+    label: "Flagship Listing",
+    hint: "Premium e-commerce product page with cropped hero",
   },
 ];
 
