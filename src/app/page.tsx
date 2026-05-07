@@ -3,8 +3,9 @@
 import { useRef, useState, type ChangeEvent, type DragEvent } from "react";
 import ImageCanvas, { type ImageCanvasHandle } from "@/components/ImageCanvas";
 import ChatPanel from "@/components/ChatPanel";
-import Toolbar from "@/components/Toolbar";
+import Toolbar, { type AppMode } from "@/components/Toolbar";
 import DownloadDialog from "@/components/DownloadDialog";
+import InfographicView from "@/components/InfographicView";
 import { useEditor, currentImage } from "@/store/editor";
 
 function dataUrlToBase64(dataUrl: string): {
@@ -34,6 +35,7 @@ export default function Home() {
   const image = currentImage(editor);
   const canvasRef = useRef<ImageCanvasHandle>(null);
 
+  const [mode, setMode] = useState<AppMode>("edit");
   const [prompt, setPrompt] = useState("");
   const [brushEnabled, setBrushEnabled] = useState(false);
   const [brushSize, setBrushSize] = useState(40);
@@ -154,6 +156,8 @@ export default function Home() {
   return (
     <div className="flex h-[100dvh] w-screen flex-col bg-neutral-950">
       <Toolbar
+        mode={mode}
+        onModeChange={setMode}
         hasImage={hasImage}
         canUndo={canUndo}
         canRedo={canRedo}
@@ -172,6 +176,9 @@ export default function Home() {
         }}
       />
 
+      {mode === "infographic" ? (
+        <InfographicView />
+      ) : (
       <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[minmax(0,1fr)_minmax(180px,40dvh)] md:grid-cols-[1fr_380px] md:grid-rows-1">
         <div
           className="relative min-h-0"
@@ -287,6 +294,7 @@ export default function Home() {
           onClearSelection={onClearMask}
         />
       </div>
+      )}
 
       <DownloadDialog
         open={downloadOpen}
