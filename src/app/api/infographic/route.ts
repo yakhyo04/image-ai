@@ -82,6 +82,7 @@ export async function POST(req: Request) {
     });
     return NextResponse.json(result);
   } catch (err) {
+    console.error("[/api/infographic] failed:", err);
     const message = err instanceof Error ? err.message : "Unknown error";
     return NextResponse.json({ error: message }, { status: 500 });
   }

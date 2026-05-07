@@ -1,4 +1,12 @@
-export type InfographicStyle = "glass" | "cards" | "ticket" | "flagship";
+export type InfographicStyle =
+  | "glass"
+  | "cards"
+  | "ticket"
+  | "flagship"
+  | "luxury"
+  | "vivid"
+  | "lifestyle"
+  | "wellness";
 
 export type InfographicStyleMeta = {
   id: InfographicStyle;
@@ -26,6 +34,26 @@ export const INFOGRAPHIC_STYLE_META: InfographicStyleMeta[] = [
     id: "flagship",
     label: "Flagship Listing",
     hint: "Premium e-commerce product page with cropped hero",
+  },
+  {
+    id: "luxury",
+    label: "Luxury Editorial",
+    hint: "Dark cinematic — premium fragrance / watch / whisky mood",
+  },
+  {
+    id: "vivid",
+    label: "Bold Vivid",
+    hint: "Saturated single-color hero — scroll-stopping social commerce",
+  },
+  {
+    id: "lifestyle",
+    label: "Lifestyle Hero",
+    hint: "Magazine scene in a real environment (Kinfolk / Aesop feel)",
+  },
+  {
+    id: "wellness",
+    label: "Wellness Apothecary",
+    hint: "Warm monochromatic glow with botanical props — skincare / beauty",
   },
 ];
 
