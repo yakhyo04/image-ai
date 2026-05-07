@@ -140,42 +140,58 @@ export async function editImage(turns: Turn[]): Promise<EditResult> {
 //   ].join("\n");
 // }
 
-// Glassmorphism
-// function buildInfographicPrompt(description?: string): string {
-//   const trimmed = description?.trim() ?? "";
-//   const hasDescription = trimmed.length > 0;
-
-//   const copyDirective = hasDescription
-//     ? `Use the product description below as the source for all on-image copy, and write the headline plus every panel label in the same language as the description. Keep wording tight: one headline of 2–4 words, two or three panel labels of 1–3 words each, and at most one one-line caption inside the largest panel.\n\nProduct description:\n"""\n${trimmed}\n"""`
-//     : "Read the product from the reference images and write the headline and panel labels yourself, in English (or in the language visible on the packaging if any). Keep wording tight: one headline of 2–4 words, two or three panel labels of 1–3 words each, and at most one one-line caption inside the largest panel.";
-
-//   return [
-//     "A premium glassmorphism product composition. The product shown in the reference images is the photoreal hero, placed off-center on a rule-of-thirds anchor, surrounded by layered frosted-glass panels floating at varying depths in front of a luminous gradient backdrop.",
-//     "",
-//     "Backdrop: a soft, blurred gradient mesh of three or four colored orbs in airy pastel tones pulled from the product's own dominant hue — pale lavender drifting into peach, mint into sky-blue, blush into champagne, or whatever harmonizes with the product. Painterly bokeh-like falloff, bright, weightless, daylight feel. The backdrop is the source of color; the glass panels carry the structure.",
-//     "",
-//     "Foreground glass panels: three or four floating rounded-rectangle glass cards arranged asymmetrically around the product. Each panel is rendered as a true frosted-glass surface — the gradient orbs behind the panel are visibly softened and color-shifted through it, the top edge carries a 1px bright white hairline highlight catching the light, the remaining rim has a faint 1px translucent white border, a subtle inner glow runs along the inside edge, and a long soft drop shadow drifts beneath each panel with a sliver of light between glass and shadow. The panels sit at slightly different depths and overlap slightly: a small pill-shape near the upper-right, a larger card in the lower-left, an icon-sized chip floating beside the product.",
-//     "",
-//     "Inside each panel, crisp white typography — a 1–3 word semibold label set in a clean modern geometric sans-serif (SF Pro Display / Inter), an optional tiny line-art glyph or numeric mark, and on the largest panel a one-line light-weight caption beneath the label. All text on glass stays sharp; only the backdrop is blurred through the glass.",
-//     "",
-//     "A hero headline of 2–4 words floats in the empty negative space, in white semibold geometric sans-serif at large display size, partially overlapping one of the glass panels so the type sits between layers and reinforces depth.",
-//     "",
-//     "Lighting: bright soft daylight from upper-left, gentle warm fill, crisp specular highlights catching the top edge of every glass panel and a faint caustic shimmer on the surface beneath the product. The whole image reads luminous, futuristic, weightless. Photoreal, magazine-grade, sub-surface scattering on translucent surfaces, believable contact shadow.",
-//     "",
-//     "Palette: airy pastel monochromatic family pulled from the product hue, with white glass and a single optional champagne or chrome accent for hairline rules. Generous negative space.",
-//     "",
-//     "Reference: Apple iOS 26 'Liquid Glass' marketing imagery, Apple Vision Pro press visuals, macOS Big Sur and Monterey wallpapers, Microsoft Fluent acrylic surfaces, premium glassmorphism UI hero shots. Imagine this as a flagship product hero on Apple's product page.",
-//     "",
-//     "Render the product accurately from the reference photos — true color, shape, materials, branding, label, proportions.",
-//     "",
-//     copyDirective,
-//     "",
-//     "Output one image. All text spelled correctly. No watermarks, no invented brand names.",
-//   ].join("\n");
-// }
-
-function buildInfographicPrompt(description?: string): string {
+function buildInfographicPrompt(
+  description: string | undefined,
+  style: InfographicStyle,
+): string {
   const trimmed = description?.trim() ?? "";
+
+  if (style === "cards") {
+    return [
+      "Design ONE marketplace infographic in the style used on Wildberries / Ozon",
+      "premium product listings: a 2x2 grid of four separate rounded-corner panels",
+      "on a light neutral background, sharing a single cohesive color story derived",
+      "from the product itself.",
+      "",
+      "Panel layout:",
+      "- Top-left (HERO): oversized product name as the dominant typographic element",
+      "  (huge soft-tone letters, partially overlapped by the product). Cinematic",
+      "  product hero shot. One small floating chip with a key fact (e.g. what's in",
+      "  the box). Light background.",
+      "- Top-right (SPECS / FEATURES): 4 small sub-tiles inside this panel, each a",
+      "  tightly cropped close-up of a different physical detail with a short label",
+      "  + one-line caption. Mix of dark-background tiles and light-background tiles.",
+      "- Bottom-left (MODES / USE CASES): single dark moody panel, dramatic cropped",
+      "  product shot, two short labels with one-line captions placed in negative space.",
+      "- Bottom-right (BENEFITS): light panel, product shown from a different angle,",
+      "  3 stacked benefit blocks (bold short title + 2-3 line caption).",
+      "",
+      "Typography: bold sans-serif. Strong size hierarchy — huge, medium, small.",
+      "Headline weight heavy; body weight regular. Labels are short (1-3 words).",
+      "",
+      "Strict no's: no circular icon badges with thin-line icons, no arrow callouts",
+      "pointing at a centered product, no rainbow color accents, no stock-template feel.",
+      "",
+      "Render the product faithfully from the attached reference photos — accurate",
+      "color, shape, branding, proportions. Recompose and relight freely.",
+      "",
+      "CRITICAL — Language rule:",
+      "Detect the natural language of the description and write ALL on-image text",
+      "in EXACTLY that language. Do not translate or mix languages.",
+      "",
+      "Hard rules:",
+      "- Output exactly ONE image containing the four panels.",
+      "- No watermarks, no fake logos, no fabricated brand names.",
+      "- All text spelled correctly.",
+      "",
+      "Product description:",
+      '"""',
+      trimmed,
+      '"""',
+    ].join("\n");
+  }
+
+  // default: glass
   return [
     "Create ONE editorial product advertisement in glassmorphism style. The",
     "ENTIRE composition must feel layered with glass — not just the callouts.",
@@ -289,6 +305,7 @@ export async function generateInfographic({
   images,
   description,
   aspectRatio = "3:4",
+  style = "glass",
 }: InfographicInput): Promise<EditResult> {
   if (images.length === 0) {
     throw new Error("At least one product image is required.");
@@ -300,7 +317,7 @@ export async function generateInfographic({
   const parts: Part[] = images.map((img) => ({
     inlineData: { mimeType: img.mimeType, data: img.base64 },
   }));
-  parts.push({ text: buildInfographicPrompt(description) });
+  parts.push({ text: buildInfographicPrompt(description, style) });
 
   const response = await ai.models.generateContent({
     model: INFOGRAPHIC_MODEL,
