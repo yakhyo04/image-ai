@@ -1,5 +1,10 @@
 import { GoogleGenAI, type Content, type Part } from "@google/genai";
-import { INFOGRAPHIC_STYLES, type InfographicStyle } from "./infographicStyles";
+import {
+  INFOGRAPHIC_STYLES,
+  INFOGRAPHIC_LANGUAGES,
+  type InfographicStyle,
+  type InfographicLanguage,
+} from "./infographicStyles";
 
 const apiKey = process.env.GEMINI_API_KEY;
 if (!apiKey) {
@@ -31,13 +36,19 @@ export type InlineImage = {
 
 export type InfographicAspect = "1:1" | "3:4" | "4:3" | "9:16" | "16:9";
 
-export { INFOGRAPHIC_STYLES, type InfographicStyle };
+export {
+  INFOGRAPHIC_STYLES,
+  INFOGRAPHIC_LANGUAGES,
+  type InfographicStyle,
+  type InfographicLanguage,
+};
 
 export type InfographicInput = {
   images: InlineImage[];
   description?: string;
   aspectRatio?: InfographicAspect;
   style?: InfographicStyle;
+  language?: InfographicLanguage;
 };
 
 function turnToContent(turn: Turn): Content {
@@ -93,58 +104,19 @@ export async function editImage(turns: Turn[]): Promise<EditResult> {
   return extractImage(response);
 }
 
-// 4 product cards
-// function buildInfographicPrompt(description?: string): string {
-//   const trimmed = description?.trim() ?? "";
-//   return [
-//     "Design ONE marketplace infographic in the style used on Wildberries / Ozon",
-//     "premium product listings: a 2x2 grid of four separate rounded-corner panels",
-//     "on a light neutral background, sharing a single cohesive color story derived",
-//     "from the product itself.",
-//     "",
-//     "Panel layout:",
-//     "- Top-left (HERO): oversized product name as the dominant typographic element",
-//     "  (huge soft-tone letters, partially overlapped by the product). Cinematic",
-//     "  product hero shot. One small floating chip with a key fact (e.g. what's in",
-//     "  the box). Light background.",
-//     "- Top-right (SPECS / FEATURES): 4 small sub-tiles inside this panel, each a",
-//     "  tightly cropped close-up of a different physical detail with a short label",
-//     "  + one-line caption. Mix of dark-background tiles and light-background tiles.",
-//     "- Bottom-left (MODES / USE CASES): single dark moody panel, dramatic cropped",
-//     "  product shot, two short labels with one-line captions placed in negative space.",
-//     "- Bottom-right (BENEFITS): light panel, product shown from a different angle,",
-//     "  3 stacked benefit blocks (bold short title + 2-3 line caption).",
-//     "",
-//     "Typography: bold sans-serif. Strong size hierarchy — huge, medium, small.",
-//     "Headline weight heavy; body weight regular. Labels are short (1-3 words).",
-//     "",
-//     "Strict no's: no circular icon badges with thin-line icons, no arrow callouts",
-//     "pointing at a centered product, no rainbow color accents, no stock-template feel.",
-//     "",
-//     "Render the product faithfully from the attached reference photos — accurate",
-//     "color, shape, branding, proportions. Recompose and relight freely.",
-//     "",
-//     "CRITICAL — Language rule:",
-//     "Detect the natural language of the description and write ALL on-image text",
-//     "in EXACTLY that language. Do not translate or mix languages.",
-//     "",
-//     "Hard rules:",
-//     "- Output exactly ONE image containing the four panels.",
-//     "- No watermarks, no fake logos, no fabricated brand names.",
-//     "- All text spelled correctly.",
-//     "",
-//     "Product description:",
-//     '"""',
-//     trimmed,
-//     '"""',
-//   ].join("\n");
-// }
+const LANGUAGE_RULE: Record<InfographicLanguage, string> = {
+  en: "Write ALL on-image text (titles, headlines, labels, captions, taglines, units) in English. Use natural, native English marketing phrasing. Do not mix languages. Numbers and universal symbols are fine.",
+  ru: "Write ALL on-image text (titles, headlines, labels, captions, taglines, units) in Russian (Русский язык). Use natural, native Russian marketing phrasing — not transliteration. Do not mix languages. Numbers and universal symbols are fine.",
+  uz: "Write ALL on-image text (titles, headlines, labels, captions, taglines, units) in Uzbek, written in the modern Latin alphabet (O'zbek tili, lotin alifbosi). Use natural, native Uzbek marketing phrasing — not transliteration of English or Russian. Do not mix languages. Numbers and universal symbols are fine.",
+};
 
 function buildInfographicPrompt(
   description: string | undefined,
   style: InfographicStyle,
+  language: InfographicLanguage,
 ): string {
   const trimmed = description?.trim() ?? "";
+  const languageRule = LANGUAGE_RULE[language];
 
   if (style === "cards") {
     return [
@@ -176,8 +148,7 @@ function buildInfographicPrompt(
       "color, shape, branding, proportions. Recompose and relight freely.",
       "",
       "CRITICAL — Language rule:",
-      "Detect the natural language of the description and write ALL on-image text",
-      "in EXACTLY that language. Do not translate or mix languages.",
+      languageRule,
       "",
       "Hard rules:",
       "- Output exactly ONE image containing the four panels.",
@@ -285,8 +256,8 @@ function buildInfographicPrompt(
     "accurate color, shape, branding, proportions, fully and prominently shown.",
     "Do not invent product details.",
     "",
-    "Language: detect the natural language of the description below and write",
-    "ALL on-image text in EXACTLY that language. No translation or mixing.",
+    "CRITICAL — Language rule:",
+    languageRule,
     "",
     "Style references: premium consumer-goods advertising, modern lifestyle",
     "brand campaigns with layered glass staging, editorial product posters.",
@@ -306,6 +277,7 @@ export async function generateInfographic({
   description,
   aspectRatio = "3:4",
   style = "glass",
+  language = "en",
 }: InfographicInput): Promise<EditResult> {
   if (images.length === 0) {
     throw new Error("At least one product image is required.");
@@ -317,14 +289,14 @@ export async function generateInfographic({
   const parts: Part[] = images.map((img) => ({
     inlineData: { mimeType: img.mimeType, data: img.base64 },
   }));
-  parts.push({ text: buildInfographicPrompt(description, style) });
+  parts.push({ text: buildInfographicPrompt(description, style, language) });
 
   const response = await ai.models.generateContent({
     model: INFOGRAPHIC_MODEL,
     contents: [{ role: "user", parts }],
     config: {
       responseModalities: ["IMAGE"],
-      imageConfig: { aspectRatio, imageSize: "4K" },
+      imageConfig: { aspectRatio, imageSize: "2K" },
     },
   });
 

@@ -2,8 +2,10 @@ import { NextResponse } from "next/server";
 import {
   generateInfographic,
   INFOGRAPHIC_STYLES,
+  INFOGRAPHIC_LANGUAGES,
   type InfographicAspect,
   type InfographicStyle,
+  type InfographicLanguage,
   type InlineImage,
 } from "@/lib/gemini";
 
@@ -23,6 +25,7 @@ type InfographicRequest = {
   description?: string;
   aspectRatio?: string;
   style?: string;
+  language?: string;
 };
 
 export async function POST(req: Request) {
@@ -33,7 +36,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const { images, description, aspectRatio, style } = body;
+  const { images, description, aspectRatio, style, language } = body;
 
   if (!Array.isArray(images) || images.length === 0) {
     return NextResponse.json(
@@ -63,12 +66,19 @@ export async function POST(req: Request) {
     ? (style as InfographicStyle)
     : "glass";
 
+  const chosenLanguage = INFOGRAPHIC_LANGUAGES.includes(
+    language as InfographicLanguage,
+  )
+    ? (language as InfographicLanguage)
+    : "en";
+
   try {
     const result = await generateInfographic({
       images,
       description,
       aspectRatio: aspect,
       style: chosenStyle,
+      language: chosenLanguage,
     });
     return NextResponse.json(result);
   } catch (err) {

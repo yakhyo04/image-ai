@@ -4,7 +4,9 @@ import { useRef, useState, type ChangeEvent, type DragEvent } from "react";
 import DownloadDialog from "@/components/DownloadDialog";
 import {
   INFOGRAPHIC_STYLE_META,
+  INFOGRAPHIC_LANGUAGE_META,
   type InfographicStyle,
+  type InfographicLanguage,
 } from "@/lib/infographicStyles";
 
 type InlineImage = {
@@ -45,6 +47,7 @@ export default function InfographicView() {
   const [description, setDescription] = useState("");
   const [aspect, setAspect] = useState<Aspect>("3:4");
   const [style, setStyle] = useState<InfographicStyle>("glass");
+  const [language, setLanguage] = useState<InfographicLanguage>("en");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<string | null>(null);
@@ -106,6 +109,7 @@ export default function InfographicView() {
           ...(trimmed ? { description: trimmed } : {}),
           aspectRatio: aspect,
           style,
+          language,
         }),
       });
       const data = await res.json();
@@ -289,6 +293,32 @@ export default function InfographicView() {
                   >
                     <div className="text-xs font-medium">{s.label}</div>
                     <div className="text-[10px] text-neutral-500">{s.hint}</div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div>
+            <div className="mb-2 text-xs font-medium uppercase tracking-wide text-neutral-500">
+              Language
+            </div>
+            <div className="grid grid-cols-3 gap-1.5">
+              {INFOGRAPHIC_LANGUAGE_META.map((l) => {
+                const active = language === l.id;
+                return (
+                  <button
+                    key={l.id}
+                    onClick={() => setLanguage(l.id)}
+                    className={`rounded-md px-2 py-1.5 text-left ring-1 ${
+                      active
+                        ? "bg-cyan-500/20 text-cyan-200 ring-cyan-500/60"
+                        : "bg-neutral-900 text-neutral-300 ring-neutral-800 hover:bg-neutral-800"
+                    }`}
+                    title={l.hint}
+                  >
+                    <div className="text-xs font-medium">{l.label}</div>
+                    <div className="text-[10px] text-neutral-500">{l.hint}</div>
                   </button>
                 );
               })}
