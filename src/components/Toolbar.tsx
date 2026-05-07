@@ -26,7 +26,7 @@ export default function Toolbar(p: Props) {
 
   return (
     <div className="flex flex-wrap items-center gap-1.5 border-b border-neutral-800 bg-neutral-950 px-3 py-2 text-neutral-100 sm:gap-2 sm:px-4">
-      <span className="hidden text-sm font-semibold sm:inline">image-ai</span>
+      <span className="hidden text-sm font-semibold sm:inline">image-AI</span>
       <span className="mx-1 hidden h-5 w-px bg-neutral-800 sm:inline-block sm:mx-2" />
 
       <div className="flex items-center gap-1">
