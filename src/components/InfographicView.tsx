@@ -27,19 +27,40 @@ const ASPECTS: { id: Aspect; label: string; hint: string }[] = [
 
 const MAX_IMAGES = 4;
 
-function fileToDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const fr = new FileReader();
-    fr.onload = () => resolve(String(fr.result));
-    fr.onerror = () => reject(fr.error);
-    fr.readAsDataURL(file);
-  });
-}
+const MAX_UPLOAD_DIM = 1536;
+const UPLOAD_JPEG_QUALITY = 0.85;
 
-function dataUrlToBase64(dataUrl: string): { base64: string; mimeType: string } {
-  const match = /^data:([^;]+);base64,(.*)$/.exec(dataUrl);
-  if (!match) throw new Error("Invalid data URL");
-  return { mimeType: match[1], base64: match[2] };
+async function resizeAndEncodeImage(
+  file: File,
+): Promise<{ dataUrl: string; base64: string; mimeType: string }> {
+  const objectUrl = URL.createObjectURL(file);
+  try {
+    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const im = new Image();
+      im.onload = () => resolve(im);
+      im.onerror = () => reject(new Error("Could not read image"));
+      im.src = objectUrl;
+    });
+
+    const longEdge = Math.max(img.naturalWidth, img.naturalHeight);
+    const scale = longEdge > MAX_UPLOAD_DIM ? MAX_UPLOAD_DIM / longEdge : 1;
+    const w = Math.max(1, Math.round(img.naturalWidth * scale));
+    const h = Math.max(1, Math.round(img.naturalHeight * scale));
+
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Canvas 2D context unavailable");
+    ctx.drawImage(img, 0, 0, w, h);
+
+    const dataUrl = canvas.toDataURL("image/jpeg", UPLOAD_JPEG_QUALITY);
+    const match = /^data:([^;]+);base64,(.*)$/.exec(dataUrl);
+    if (!match) throw new Error("Failed to encode image");
+    return { dataUrl, mimeType: match[1], base64: match[2] };
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
 }
 
 export default function InfographicView() {
@@ -68,8 +89,7 @@ export default function InfographicView() {
     }
     const next: InlineImage[] = [];
     for (const file of list.slice(0, remaining)) {
-      const dataUrl = await fileToDataUrl(file);
-      const { base64, mimeType } = dataUrlToBase64(dataUrl);
+      const { dataUrl, base64, mimeType } = await resizeAndEncodeImage(file);
       next.push({ dataUrl, base64, mimeType });
     }
     setImages((prev) => [...prev, ...next].slice(0, MAX_IMAGES));
