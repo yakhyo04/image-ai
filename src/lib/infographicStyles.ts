@@ -6,7 +6,11 @@ export type InfographicStyle =
   | "luxury"
   | "vivid"
   | "lifestyle"
-  | "wellness";
+  | "wellness"
+  | "model"
+  | "meme"
+  | "creative"
+  | "studio";
 
 export type InfographicStyleMeta = {
   id: InfographicStyle;
@@ -54,6 +58,26 @@ export const INFOGRAPHIC_STYLE_META: InfographicStyleMeta[] = [
     id: "wellness",
     label: "Wellness Apothecary",
     hint: "Warm monochromatic glow with botanical props — skincare / beauty",
+  },
+  {
+    id: "model",
+    label: "On-Model Apparel",
+    hint: "Fashion-catalog look — garment worn by a generated model",
+  },
+  {
+    id: "meme",
+    label: "Meme Poster",
+    hint: "Viral magazine-cover poster with a comedic character + the product",
+  },
+  {
+    id: "creative",
+    label: "Creative Concept",
+    hint: "Imaginative art-directed scene with one bold visual concept",
+  },
+  {
+    id: "studio",
+    label: "Studio Hero Shot",
+    hint: "Clean professional product photo on a seamless backdrop",
   },
 ];
 
