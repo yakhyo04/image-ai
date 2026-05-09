@@ -378,7 +378,11 @@ export default function InfographicView() {
             disabled={!canGenerate}
             className="w-full rounded-md bg-cyan-500 px-3 py-2.5 text-sm font-medium text-neutral-950 hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {busy ? "Generating…" : "Generate infographic"}
+            {busy
+              ? style === "cards"
+                ? "Generating 4 panels sequentially (2–4 min)…"
+                : "Generating…"
+              : "Generate infographic"}
           </button>
           <div className="mt-2 text-center text-[11px] text-neutral-600">
             Powered by Nano Banana Pro

@@ -8,6 +8,7 @@ import {
   type InfographicLanguage,
   type InlineImage,
 } from "@/lib/gemini";
+import { generateCards } from "@/lib/cards/pipeline";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
@@ -73,13 +74,21 @@ export async function POST(req: Request) {
     : "en";
 
   try {
-    const result = await generateInfographic({
-      images,
-      description,
-      aspectRatio: aspect,
-      style: chosenStyle,
-      language: chosenLanguage,
-    });
+    const result =
+      chosenStyle === "cards"
+        ? await generateCards({
+            images,
+            description,
+            aspectRatio: aspect,
+            language: chosenLanguage,
+          })
+        : await generateInfographic({
+            images,
+            description,
+            aspectRatio: aspect,
+            style: chosenStyle,
+            language: chosenLanguage,
+          });
     return NextResponse.json(result);
   } catch (err) {
     console.error("[/api/infographic] failed:", err);
