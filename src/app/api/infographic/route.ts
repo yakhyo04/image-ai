@@ -8,13 +8,9 @@ import {
   type InfographicLanguage,
   type InlineImage,
 } from "@/lib/gemini";
-import { generateCards } from "@/lib/cards/pipeline";
 
 export const runtime = "nodejs";
-// Cards style runs 4 sequential Gemini calls (~30–60s each) and may add
-// up to 210s of retry backoff on 429s — total worst-case ≈ 5 min. Other
-// styles still run a single call and finish in well under a minute.
-export const maxDuration = 300;
+export const maxDuration = 120;
 
 const ALLOWED_ASPECTS: InfographicAspect[] = [
   "1:1",
@@ -77,21 +73,13 @@ export async function POST(req: Request) {
     : "en";
 
   try {
-    const result =
-      chosenStyle === "cards"
-        ? await generateCards({
-            images,
-            description,
-            aspectRatio: aspect,
-            language: chosenLanguage,
-          })
-        : await generateInfographic({
-            images,
-            description,
-            aspectRatio: aspect,
-            style: chosenStyle,
-            language: chosenLanguage,
-          });
+    const result = await generateInfographic({
+      images,
+      description,
+      aspectRatio: aspect,
+      style: chosenStyle,
+      language: chosenLanguage,
+    });
     return NextResponse.json(result);
   } catch (err) {
     console.error("[/api/infographic] failed:", err);
