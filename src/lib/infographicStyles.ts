@@ -10,7 +10,25 @@ export type InfographicStyle =
   | "model"
   | "meme"
   | "creative"
-  | "studio";
+  | "studio"
+  | "editorial"
+  | "appliance"
+  | "botanical"
+  | "pastel"
+  | "household"
+  | "natural"
+  | "dramatic"
+  | "fashion"
+  | "kinetic"
+  | "liquid"
+  | "streetwear"
+  | "watercolor"
+  | "beverage"
+  | "fantasy"
+  | "moss"
+  | "wardrobe"
+  | "specsheet"
+  | "specsheet2";
 
 export type InfographicStyleMeta = {
   id: InfographicStyle;
@@ -78,6 +96,96 @@ export const INFOGRAPHIC_STYLE_META: InfographicStyleMeta[] = [
     id: "studio",
     label: "Studio Hero Shot",
     hint: "Clean professional product photo on a seamless backdrop",
+  },
+  {
+    id: "editorial",
+    label: "Editorial",
+    hint: "Editorial",
+  },
+  {
+    id: "appliance",
+    label: "Appliance",
+    hint: "Appliance",
+  },
+  {
+    id: "botanical",
+    label: "botanical",
+    hint: "botanical",
+  },
+  {
+    id: "pastel",
+    label: "pastel",
+    hint: "pastel",
+  },
+  {
+    id: "household",
+    label: "household",
+    hint: "household",
+  },
+  {
+    id: "natural",
+    label: "natural",
+    hint: "natural",
+  },
+  {
+    id: "dramatic",
+    label: "dramatic",
+    hint: "dramatic",
+  },
+  {
+    id: "fashion",
+    label: "fashion",
+    hint: "fashion",
+  },
+  {
+    id: "kinetic",
+    label: "kinetic",
+    hint: "kinetic",
+  },
+  {
+    id: "liquid",
+    label: "liquid",
+    hint: "liquid",
+  },
+  {
+    id: "streetwear",
+    label: "streetwear",
+    hint: "streetwear",
+  },
+  {
+    id: "watercolor",
+    label: "watercolor",
+    hint: "watercolor",
+  },
+  {
+    id: "beverage",
+    label: "beverage",
+    hint: "beverage",
+  },
+  {
+    id: "fantasy",
+    label: "fantasy",
+    hint: "fantasy",
+  },
+  {
+    id: "moss",
+    label: "moss",
+    hint: "moss",
+  },
+  {
+    id: "wardrobe",
+    label: "wardrobe",
+    hint: "wardrobe",
+  },
+  {
+    id: "specsheet",
+    label: "specsheet",
+    hint: "specsheet",
+  },
+  {
+    id: "specsheet2",
+    label: "specsheet2",
+    hint: "specsheet2",
   },
 ];
 
