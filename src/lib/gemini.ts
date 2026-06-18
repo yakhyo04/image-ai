@@ -11,7 +11,14 @@ if (!apiKey) {
   throw new Error("GEMINI_API_KEY is not set in environment");
 }
 
-export const ai = new GoogleGenAI({ apiKey, vertexai: true });
+// A standard AI Studio GEMINI_API_KEY works with the Gemini Developer API
+// (generativelanguage.googleapis.com). Vertex (aiplatform.googleapis.com)
+// needs a Vertex-enabled key/project, so only use it when explicitly opted in.
+const useVertex = process.env.GEMINI_USE_VERTEX === "true";
+
+export const ai = new GoogleGenAI(
+  useVertex ? { apiKey, vertexai: true } : { apiKey },
+);
 
 export const IMAGE_MODEL = "gemini-3-pro-image-preview";
 export const INFOGRAPHIC_MODEL = "gemini-3-pro-image-preview";

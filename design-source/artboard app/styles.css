@@ -1,0 +1,170 @@
+/* Artboard — design tokens (dark-first, light variant) */
+:root {
+  /* surfaces — near-black, cool charcoal */
+  --bg: oklch(0.145 0.008 264);
+  --bg-1: oklch(0.185 0.009 264);
+  --bg-2: oklch(0.225 0.010 264);
+  --bg-3: oklch(0.275 0.011 264);
+  --bg-glass: oklch(0.20 0.010 264 / 0.72);
+  --page: oklch(0.105 0.006 264);     /* canvas behind sections */
+
+  --border: oklch(1 0 0 / 0.07);
+  --border-mid: oklch(1 0 0 / 0.12);
+  --border-strong: oklch(1 0 0 / 0.20);
+
+  /* text */
+  --t-1: oklch(0.985 0 0);
+  --t-2: oklch(0.78 0.008 264);
+  --t-3: oklch(0.60 0.012 264);
+  --t-4: oklch(0.44 0.012 264);
+
+  /* accent — electric lime */
+  --acc: oklch(0.89 0.20 132);
+  --acc-2: oklch(0.80 0.18 132);
+  --acc-ink: oklch(0.19 0.06 132);
+  --acc-soft: oklch(0.89 0.20 132 / 0.15);
+  --acc-line: oklch(0.89 0.20 132 / 0.32);
+
+  /* secondary glow tints (for gallery variety, never UI chrome) */
+  --v-blue: oklch(0.62 0.16 250);
+  --v-violet: oklch(0.62 0.18 300);
+  --v-amber: oklch(0.78 0.16 70);
+  --v-cyan: oklch(0.72 0.13 200);
+
+  --ok: oklch(0.80 0.16 150);
+  --err: oklch(0.70 0.21 22);
+  --warn: oklch(0.82 0.15 80);
+
+  /* radii */
+  --r-xs: 8px;
+  --r-sm: 12px;
+  --r-md: 18px;
+  --r-lg: 24px;
+  --r-xl: 32px;
+
+  --sh-1: 0 1px 0 oklch(1 0 0 / 0.04) inset, 0 1px 2px oklch(0 0 0 / 0.3);
+  --sh-2: 0 24px 60px -20px oklch(0 0 0 / 0.6), 0 2px 8px oklch(0 0 0 / 0.35);
+  --sh-pop: 0 40px 90px -30px oklch(0 0 0 / 0.7);
+
+  --font: "Space Grotesk", "Inter Tight", -apple-system, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --grad: linear-gradient(120deg, oklch(0.92 0.2 132), oklch(0.84 0.17 150));
+}
+
+/* LIGHT VARIANT — warm paper, same lime */
+[data-theme="light"] {
+  --bg: oklch(0.985 0.004 100);
+  --bg-1: oklch(0.965 0.005 100);
+  --bg-2: oklch(0.93 0.006 100);
+  --bg-3: oklch(0.90 0.007 100);
+  --bg-glass: oklch(0.99 0.004 100 / 0.72);
+  --page: oklch(0.95 0.005 100);
+
+  --border: oklch(0.2 0.01 264 / 0.10);
+  --border-mid: oklch(0.2 0.01 264 / 0.16);
+  --border-strong: oklch(0.2 0.01 264 / 0.26);
+
+  --t-1: oklch(0.20 0.01 264);
+  --t-2: oklch(0.36 0.012 264);
+  --t-3: oklch(0.50 0.012 264);
+  --t-4: oklch(0.62 0.010 264);
+
+  --acc: oklch(0.72 0.18 134);
+  --acc-2: oklch(0.66 0.17 134);
+  --acc-ink: oklch(0.99 0.02 132);
+  --acc-soft: oklch(0.72 0.18 134 / 0.14);
+  --acc-line: oklch(0.72 0.18 134 / 0.30);
+
+  --sh-1: 0 1px 2px oklch(0.2 0.02 264 / 0.08);
+  --sh-2: 0 24px 60px -24px oklch(0.2 0.02 264 / 0.22);
+  --sh-pop: 0 40px 90px -32px oklch(0.2 0.02 264 / 0.28);
+}
+
+* { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+html, body { margin: 0; padding: 0; }
+
+/* ── App surface (fills an artboard) ───────────────────────── */
+.ab {
+  width: 100%; height: 100%;
+  background: var(--bg);
+  color: var(--t-1);
+  font-family: var(--font);
+  position: relative;
+  letter-spacing: -0.01em;
+  overflow: hidden;
+}
+.ab-scroll { width: 100%; height: 100%; overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--bg-3) transparent; }
+.ab-scroll::-webkit-scrollbar { width: 10px; }
+.ab-scroll::-webkit-scrollbar-thumb { background: var(--bg-3); border-radius: 10px; border: 3px solid var(--bg); }
+.ab-row { display: flex; }
+
+/* ── Buttons ───────────────────────────────────────────────── */
+.ab-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  font-family: var(--font); font-weight: 600; font-size: 15px; letter-spacing: -0.01em;
+  border: none; cursor: pointer; padding: 12px 20px; border-radius: 12px;
+  transition: transform .12s ease, background .15s ease, opacity .15s ease, border-color .15s ease;
+  user-select: none; white-space: nowrap;
+}
+.ab-btn:active { transform: scale(0.98); }
+.ab-btn-primary { background: var(--acc); color: var(--acc-ink); box-shadow: 0 1px 0 oklch(1 0 0 / 0.3) inset, 0 10px 28px -10px var(--acc-line); }
+.ab-btn-primary:hover { background: var(--acc-2); }
+.ab-btn-grad { background: var(--grad); color: var(--acc-ink); box-shadow: 0 10px 30px -10px var(--acc-line); }
+.ab-btn-ghost { background: var(--bg-2); color: var(--t-1); border: 1px solid var(--border-mid); }
+.ab-btn-ghost:hover { border-color: var(--border-strong); background: var(--bg-3); }
+.ab-btn-outline { background: transparent; color: var(--t-1); border: 1px solid var(--border-mid); }
+.ab-btn-outline:hover { border-color: var(--border-strong); }
+.ab-btn-text { background: transparent; color: var(--t-2); padding: 10px 10px; }
+.ab-btn-text:hover { color: var(--t-1); }
+.ab-btn-full { width: 100%; }
+.ab-btn-lg { padding: 15px 26px; font-size: 16px; border-radius: 14px; }
+.ab-btn-sm { padding: 8px 14px; font-size: 13px; border-radius: 10px; }
+
+/* ── Cards ─────────────────────────────────────────────────── */
+.ab-card { background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--r-md); }
+.ab-card-glass { background: var(--bg-glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--border-mid); border-radius: var(--r-md); }
+
+/* ── Type helpers ──────────────────────────────────────────── */
+.ab-display { font-size: 72px; font-weight: 600; letter-spacing: -0.045em; line-height: 0.98; }
+.ab-h1 { font-size: 44px; font-weight: 600; letter-spacing: -0.04em; line-height: 1.04; }
+.ab-h2 { font-size: 34px; font-weight: 600; letter-spacing: -0.035em; line-height: 1.08; }
+.ab-h3 { font-size: 22px; font-weight: 600; letter-spacing: -0.025em; line-height: 1.15; }
+.ab-h4 { font-size: 17px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.2; }
+.ab-body { font-size: 15px; line-height: 1.55; color: var(--t-2); letter-spacing: -0.003em; }
+.ab-eyebrow { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--t-3); font-weight: 500; }
+.ab-mono { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0; }
+
+/* ── Chips / pills ─────────────────────────────────────────── */
+.ab-chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--bg-2); border: 1px solid var(--border); border-radius: 100px; font-size: 12px; font-weight: 500; color: var(--t-2); letter-spacing: -0.005em; white-space: nowrap; }
+.ab-chip-acc { background: var(--acc-soft); border-color: var(--acc-line); color: var(--acc); }
+
+/* ── Glow ──────────────────────────────────────────────────── */
+.ab-glow { position: absolute; pointer-events: none; border-radius: 50%; filter: blur(70px); opacity: 0.5; }
+
+/* ── Striped placeholder ───────────────────────────────────── */
+.ab-ph {
+  position: relative; overflow: hidden;
+  background: repeating-linear-gradient(135deg, oklch(1 0 0 / 0.05) 0 1px, transparent 1px 10px), var(--bg-2);
+  border: 1px solid var(--border);
+  display: flex; align-items: flex-end;
+}
+.ab-ph-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(1 0 0 / 0.78); padding: 3px 7px; border-radius: 6px; background: oklch(0 0 0 / 0.4); backdrop-filter: blur(8px); margin: 10px; }
+[data-theme="light"] .ab-ph { background: repeating-linear-gradient(135deg, oklch(0.2 0.01 264 / 0.06) 0 1px, transparent 1px 10px), var(--bg-2); }
+[data-theme="light"] .ab-ph-label { color: oklch(1 0 0 / 0.92); background: oklch(0.2 0.02 264 / 0.5); }
+
+/* ── Nav link ──────────────────────────────────────────────── */
+.ab-nav-link { font-size: 14px; font-weight: 500; color: var(--t-2); cursor: pointer; transition: color .15s ease; letter-spacing: -0.01em; }
+.ab-nav-link:hover { color: var(--t-1); }
+
+/* ── Dividers ──────────────────────────────────────────────── */
+.ab-rule { height: 1px; width: 100%; background: var(--border); }
+
+/* ── Animations ────────────────────────────────────────────── */
+@keyframes ab-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+@keyframes ab-spin { to { transform: rotate(360deg); } }
+@keyframes ab-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+@keyframes ab-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+@keyframes ab-dot { 0%, 100% { opacity: 0.3; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-3px); } }
+
+/* selection */
+::selection { background: var(--acc-line); color: var(--t-1); }
