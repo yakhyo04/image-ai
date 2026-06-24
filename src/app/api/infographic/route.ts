@@ -8,6 +8,10 @@ import {
   type InfographicLanguage,
   type InlineImage,
 } from "@/lib/gemini";
+import { createClient } from "@/lib/supabase/server";
+import { persistGeneration } from "@/lib/persistGeneration";
+import { reserveCredits, refundCredits, GENERATION_COST } from "@/lib/credits";
+import { logGenerationEvent } from "@/lib/genEvents";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
@@ -37,6 +41,12 @@ export async function POST(req: Request) {
   }
 
   const { images, description, aspectRatio, style, language } = body;
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+  }
 
   if (!Array.isArray(images) || images.length === 0) {
     return NextResponse.json(
@@ -72,6 +82,14 @@ export async function POST(req: Request) {
     ? (language as InfographicLanguage)
     : "en";
 
+  const credits = await reserveCredits(supabase);
+  if (credits === null) {
+    return NextResponse.json(
+      { error: `Not enough credits — each generation costs ${GENERATION_COST}.` },
+      { status: 402 },
+    );
+  }
+
   try {
     const result = await generateInfographic({
       images,
@@ -80,8 +98,17 @@ export async function POST(req: Request) {
       style: chosenStyle,
       language: chosenLanguage,
     });
-    return NextResponse.json(result);
+    await persistGeneration({
+      imageBase64: result.imageBase64,
+      mimeType: result.mimeType,
+      tool: "infographics",
+      prompt: description,
+    });
+    await logGenerationEvent(supabase, user.id, "infographics", "success");
+    return NextResponse.json({ ...result, credits });
   } catch (err) {
+    await refundCredits(supabase);
+    await logGenerationEvent(supabase, user.id, "infographics", "failed");
     console.error("[/api/infographic] failed:", err);
     const message = err instanceof Error ? err.message : "Unknown error";
     return NextResponse.json({ error: message }, { status: 500 });

@@ -3,13 +3,14 @@
 import { useState } from "react";
 import { Icon } from "@/components/landing/ui";
 import DashFrame from "./DashFrame";
+import { GENERATION_COST } from "@/lib/credits";
 
 const PLANS = [
-  { name: "Starter", price: "0", credits: "30", per: "Free forever" },
-  { name: "Pro", price: "24", credits: "500", per: "For active sellers" },
-  { name: "Business", price: "79", credits: "2,000", per: "For teams" },
+  { name: "Starter", price: "0", credits: "30", creditsNum: 30, per: "Free forever" },
+  { name: "Pro", price: "24", credits: "500", creditsNum: 500, per: "For active sellers" },
+  { name: "Business", price: "79", credits: "2,000", creditsNum: 2000, per: "For teams" },
 ];
-const CURRENT_PLAN = 1; // Pro
+const CURRENT_PLAN = 0; // Starter — the only plan until billing exists.
 
 const PACKS = [
   { c: 100, p: "$6", per: "Quick top-up" },
@@ -17,23 +18,53 @@ const PACKS = [
   { c: 2000, p: "$79", per: "Same as Business" },
 ];
 
-const TXNS = [
-  { k: "topup", t: "Credit top-up · 500", m: "Click", d: "May 1", delta: "+500", amt: "$24" },
-  { k: "spend", t: "Infographics · 4 variants", m: "Glass", d: "May 1", delta: "−5", amt: "" },
-  { k: "spend", t: "Background removal · batch", m: "10 images", d: "Apr 30", delta: "−30", amt: "" },
-  { k: "spend", t: "Interior staging", m: "Scandi", d: "Apr 29", delta: "−6", amt: "" },
-  { k: "topup", t: "Monthly Pro credits", m: "Subscription", d: "Apr 28", delta: "+500", amt: "$24" },
-];
+const TOOL_LABELS: Record<string, string> = {
+  infographics: "Infographics",
+  editor: "Photo edits",
+  interior: "Interior",
+  mockups: "Mockups",
+  backgrounds: "Backgrounds",
+  patterns: "Patterns",
+};
 
-const METHODS: [string, string, boolean][] = [
-  ["Click", "•••• 4821", true],
-  ["Payme", "•••• 7390", false],
-  ["Uzcard", "•••• 1265", false],
-];
+type Gen = { tool: string | null; createdAt: string };
 
-export default function DashCredits() {
+function fmtDate(iso: string | null): string {
+  if (!iso) return "";
+  return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
+export default function DashCredits({ credits, joinedAt, gens }: { credits: number; joinedAt: string | null; gens: Gen[] }) {
   const [plan, setPlan] = useState(CURRENT_PLAN);
   const [pack, setPack] = useState(1); // best
+
+  // Usage this month, derived from real generations.
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+  const thisMonth = gens.filter((g) => new Date(g.createdAt).getTime() >= monthStart);
+  const usedThisMonth = thisMonth.length * GENERATION_COST;
+  const allowance = PLANS[CURRENT_PLAN].creditsNum;
+  const pct = allowance ? Math.min(100, Math.round((usedThisMonth / allowance) * 100)) : 0;
+
+  // Top tools used this month.
+  const tally = new Map<string, number>();
+  for (const g of thisMonth) {
+    const key = g.tool ?? "other";
+    tally.set(key, (tally.get(key) ?? 0) + 1);
+  }
+  const topTools = [...tally.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3);
+
+  // Transaction history: each generation is a spend; the sign-up bonus is a top-up.
+  const txns = [
+    ...gens.slice(0, 6).map((g) => ({
+      k: "spend" as const,
+      t: `${TOOL_LABELS[g.tool ?? ""] ?? "Generation"} · 1 image`,
+      m: "Generation",
+      d: fmtDate(g.createdAt),
+      delta: `−${GENERATION_COST}`,
+    })),
+    { k: "topup" as const, t: "Welcome credits", m: "Sign-up bonus", d: fmtDate(joinedAt), delta: "+30" },
+  ];
 
   return (
     <DashFrame active="credits" title="Credits & Billing">
@@ -47,34 +78,38 @@ export default function DashCredits() {
             <div style={{ position: "relative" }}>
               <div className="ab-eyebrow">Current balance</div>
               <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginTop: 10 }}>
-                <span style={{ fontSize: 64, fontWeight: 600, letterSpacing: "-0.05em", lineHeight: 1 }}>500</span>
+                <span style={{ fontSize: 64, fontWeight: 600, letterSpacing: "-0.05em", lineHeight: 1 }}>{credits}</span>
                 <span className="ab-body" style={{ fontSize: 15 }}>credits</span>
               </div>
-              <div className="ab-body" style={{ fontSize: 13, marginTop: 8 }}>≈ 100 infographics · 166 background removals</div>
+              <div className="ab-body" style={{ fontSize: 13, marginTop: 8 }}>≈ {Math.floor(credits / GENERATION_COST)} generations · {GENERATION_COST} credits each</div>
               <button className="ab-btn ab-btn-primary" style={{ marginTop: 18 }}><Icon name="plus" size={16} stroke={2.4} /> Buy more credits</button>
             </div>
           </div>
           <div className="ab-card" style={{ padding: 26 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
               <div className="ab-eyebrow">Usage this month</div>
-              <span className="ab-chip ab-chip-acc"><Icon name="crown" size={12} /> Pro</span>
+              <span className="ab-chip ab-chip-acc"><Icon name="crown" size={12} /> {PLANS[CURRENT_PLAN].name}</span>
             </div>
             <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 10 }}>
-              <span style={{ fontSize: 15, fontWeight: 600 }}>180 / 500 used</span>
-              <span className="ab-mono" style={{ color: "var(--acc)", fontWeight: 700 }}>36%</span>
+              <span style={{ fontSize: 15, fontWeight: 600 }}>{usedThisMonth} / {allowance} used</span>
+              <span className="ab-mono" style={{ color: "var(--acc)", fontWeight: 700 }}>{pct}%</span>
             </div>
             <div style={{ height: 10, borderRadius: 100, background: "var(--bg-3)", overflow: "hidden" }}>
-              <div style={{ width: "36%", height: "100%", borderRadius: 100, background: "linear-gradient(90deg, var(--acc-2), var(--acc))" }} />
+              <div style={{ width: `${pct}%`, height: "100%", borderRadius: 100, background: "linear-gradient(90deg, var(--acc-2), var(--acc))" }} />
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginTop: 22 }}>
-              {[["Infographics", "110"], ["Backgrounds", "45"], ["Interior", "25"]].map(([k, v], i) => (
-                <div key={i}>
-                  <div style={{ fontSize: 20, fontWeight: 600, letterSpacing: "-0.03em" }}>{v}</div>
-                  <div className="ab-body" style={{ fontSize: 11.5, marginTop: 2 }}>{k}</div>
-                </div>
-              ))}
+              {topTools.length === 0 ? (
+                <div className="ab-body" style={{ fontSize: 12.5, gridColumn: "1 / -1" }}>No generations yet this month.</div>
+              ) : (
+                topTools.map(([key, count], i) => (
+                  <div key={i}>
+                    <div style={{ fontSize: 20, fontWeight: 600, letterSpacing: "-0.03em" }}>{count}</div>
+                    <div className="ab-body" style={{ fontSize: 11.5, marginTop: 2 }}>{TOOL_LABELS[key] ?? "Other"}</div>
+                  </div>
+                ))
+              )}
             </div>
-            <div className="ab-body" style={{ fontSize: 12, marginTop: 18 }}>Renews May 28 · unused credits roll over 30 days</div>
+            <div className="ab-body" style={{ fontSize: 12, marginTop: 18 }}>Starter plan · {allowance} credits included each month</div>
           </div>
         </div>
 
@@ -166,17 +201,10 @@ export default function DashCredits() {
         <div className="ab-dash-home-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1.4fr", gap: 24 }}>
           <div>
             <div className="ab-h4" style={{ fontSize: 17, marginBottom: 16 }}>Payment methods</div>
-            <div className="ab-card" style={{ overflow: "hidden" }}>
-              {METHODS.map(([m, n, def], i) => (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: 13, padding: "15px 16px", borderBottom: i < 2 ? "1px solid var(--border)" : "none" }}>
-                  <div style={{ width: 40, height: 28, borderRadius: 7, background: "var(--bg-3)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-mono)", fontSize: 9, fontWeight: 700, color: "var(--t-2)" }}>{m.slice(0, 2).toUpperCase()}</div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 13.5, fontWeight: 600 }}>{m}</div>
-                    <div className="ab-mono" style={{ color: "var(--t-3)", fontSize: 11 }}>{n}</div>
-                  </div>
-                  {def && <span className="ab-chip ab-chip-acc" style={{ padding: "3px 9px", fontSize: 10 }}>Default</span>}
-                </div>
-              ))}
+            <div className="ab-card" style={{ padding: 22, textAlign: "center" }}>
+              <div style={{ width: 44, height: 44, borderRadius: 13, background: "var(--bg-3)", color: "var(--t-3)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px" }}><Icon name="gem" size={20} /></div>
+              <div style={{ fontSize: 13.5, fontWeight: 600 }}>No payment methods yet</div>
+              <div className="ab-body" style={{ fontSize: 12, marginTop: 4 }}>Add one when you’re ready to upgrade or buy credits.</div>
             </div>
             <button className="ab-btn ab-btn-ghost ab-btn-full" style={{ marginTop: 12 }}><Icon name="plus" size={15} stroke={2.2} /> Add method</button>
             <div className="ab-body" style={{ fontSize: 12, marginTop: 14, display: "flex", alignItems: "center", gap: 7 }}><Icon name="shield" size={14} style={{ color: "var(--acc)" }} /> Payments secured · Click · Payme · Humo</div>
@@ -187,8 +215,8 @@ export default function DashCredits() {
               <button className="ab-btn ab-btn-ghost ab-btn-sm"><Icon name="download" size={14} /> Export</button>
             </div>
             <div className="ab-card" style={{ overflow: "hidden" }}>
-              {TXNS.map((tx, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: 14, padding: "15px 18px", borderBottom: i < TXNS.length - 1 ? "1px solid var(--border)" : "none" }}>
+              {txns.map((tx, i) => (
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: 14, padding: "15px 18px", borderBottom: i < txns.length - 1 ? "1px solid var(--border)" : "none" }}>
                   <div style={{ width: 36, height: 36, borderRadius: 11, background: tx.k === "topup" ? "var(--acc-soft)" : "var(--bg-2)", color: tx.k === "topup" ? "var(--acc)" : "var(--t-2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><Icon name={tx.k === "topup" ? "plus" : "sparkle-fill"} size={16} /></div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 13.5, fontWeight: 600, letterSpacing: "-0.01em" }}>{tx.t}</div>
@@ -196,7 +224,6 @@ export default function DashCredits() {
                   </div>
                   <div style={{ textAlign: "right" }}>
                     <div className="ab-mono" style={{ fontSize: 14, fontWeight: 700, color: tx.k === "topup" ? "var(--ok)" : "var(--t-1)" }}>{tx.delta} <span style={{ fontSize: 10, color: "var(--t-3)" }}>cr</span></div>
-                    {tx.amt && <div className="ab-mono" style={{ fontSize: 10, color: "var(--t-3)", marginTop: 2 }}>{tx.amt}</div>}
                   </div>
                 </div>
               ))}

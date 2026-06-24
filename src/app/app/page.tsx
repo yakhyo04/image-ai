@@ -107,6 +107,7 @@ export default function Home() {
           imageMimeType: mimeType,
           prompt: userText,
           selectionMode: !!masked,
+          tool: "editor",
         }),
       });
       const data = await res.json();

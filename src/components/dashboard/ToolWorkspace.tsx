@@ -65,7 +65,7 @@ export default function ToolWorkspace({ toolKey }: { toolKey: string }) {
       const res = await fetch("/api/edit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ imageBase64: image.base64, imageMimeType: image.mimeType, prompt, selectionMode: false }),
+        body: JSON.stringify({ imageBase64: image.base64, imageMimeType: image.mimeType, prompt, selectionMode: false, tool: cfg.active }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? `HTTP ${res.status}`);

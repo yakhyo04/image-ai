@@ -4,6 +4,15 @@ import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Icon, ArtboardMark } from "@/components/landing/ui";
+import { createClient } from "@/lib/supabase/client";
+import { logoutAction } from "@/app/actions/auth";
+
+function initials(name: string, email: string): string {
+  const src = name.trim() || email.split("@")[0] || "";
+  const parts = src.split(/[\s._-]+/).filter(Boolean);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return (src.slice(0, 2) || "AB").toUpperCase();
+}
 
 type SidebarItem = { id: string; icon: string; label: string; href: string; badge?: string };
 
@@ -74,7 +83,8 @@ function Row({ t, active, collapsed }: { t: SidebarItem; active: string; collaps
   );
 }
 
-function Sidebar({ active, collapsed }: { active: string; collapsed: boolean }) {
+function Sidebar({ active, collapsed, credits }: { active: string; collapsed: boolean; credits: number | null }) {
+  const lib = LIB.map((t) => (t.id === "credits" && credits !== null ? { ...t, badge: String(credits) } : t));
   return (
     <div className="ab-dash-sidebar" style={{ width: collapsed ? 72 : 248, flexShrink: 0, height: "100%", background: "var(--bg)", borderRight: "1px solid var(--border)", display: "flex", flexDirection: "column", padding: collapsed ? "20px 12px" : "20px 16px", transition: "width .2s ease", overflow: "hidden" }}>
       <Link href="/" style={{ flexShrink: 0, padding: collapsed ? "0" : "0 6px", display: "flex", justifyContent: collapsed ? "center" : "flex-start", marginBottom: 22, textDecoration: "none", color: "inherit" }}>
@@ -89,15 +99,15 @@ function Sidebar({ active, collapsed }: { active: string; collapsed: boolean }) 
         <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>{TOOLS.map((t) => <Row key={t.id} t={t} active={active} collapsed={collapsed} />)}</div>
         <div style={{ height: 1, background: "var(--border)", margin: "16px 6px" }} />
         {!collapsed && <div className="ab-eyebrow" style={{ padding: "0 8px 10px", fontSize: 10 }}>Library</div>}
-        <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>{LIB.map((t) => <Row key={t.id} t={t} active={active} collapsed={collapsed} />)}</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>{lib.map((t) => <Row key={t.id} t={t} active={active} collapsed={collapsed} />)}</div>
       </div>
 
       {!collapsed ? (
         <div style={{ flexShrink: 0, marginTop: 16, borderRadius: 16, padding: 16, background: "linear-gradient(160deg, var(--acc-soft), transparent)", border: "1px solid var(--acc-line)", position: "relative", overflow: "hidden" }}>
           <div className="ab-glow" style={{ width: 120, height: 120, background: "var(--acc)", bottom: -50, right: -30, opacity: 0.25 }} />
           <div style={{ position: "relative" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 13, fontWeight: 700 }}><Icon name="crown" size={15} stroke={2} style={{ color: "var(--acc)" }} /> Pro plan</div>
-            <div className="ab-body" style={{ fontSize: 11.5, marginTop: 6 }}>500 credits left this month.</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 13, fontWeight: 700 }}><Icon name="crown" size={15} stroke={2} style={{ color: "var(--acc)" }} /> Free plan</div>
+            <div className="ab-body" style={{ fontSize: 11.5, marginTop: 6 }}>{credits ?? "—"} credits left.</div>
             <Link href="/dashboard/credits" className="ab-btn ab-btn-primary ab-btn-full ab-btn-sm" style={{ marginTop: 12 }}>Manage plan</Link>
           </div>
         </div>
@@ -108,7 +118,22 @@ function Sidebar({ active, collapsed }: { active: string; collapsed: boolean }) 
   );
 }
 
-function Topbar({ title, onToggle }: { title: string; onToggle: () => void }) {
+function Topbar({ title, onToggle, credits }: { title: string; onToggle: () => void; credits: number | null }) {
+  const [user, setUser] = useState<{ name: string; email: string; avatar: string | null } | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => {
+      const u = data.user;
+      if (!u) return;
+      const meta = (u.user_metadata ?? {}) as Record<string, string>;
+      setUser({ name: meta.full_name ?? meta.name ?? "", email: u.email ?? "", avatar: meta.avatar_url ?? null });
+    });
+  }, []);
+
+  const ini = user ? initials(user.name, user.email) : "··";
+
   return (
     <div className="ab-dash-topbar" style={{ height: 64, flexShrink: 0, borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 16, padding: "0 24px", background: "var(--bg)" }}>
       <button onClick={onToggle} aria-label="Toggle sidebar" className="ab-dash-menu" style={{ width: 36, height: 36, borderRadius: 10, background: "transparent", border: "1px solid var(--border)", color: "var(--t-2)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}><Icon name="menu" size={18} /></button>
@@ -119,12 +144,37 @@ function Topbar({ title, onToggle }: { title: string; onToggle: () => void }) {
         <Icon name="search" size={16} /><span style={{ fontSize: 13 }}>Search generations…</span>
         <span style={{ marginLeft: "auto", fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--t-4)", border: "1px solid var(--border-mid)", borderRadius: 5, padding: "1px 5px" }}>⌘K</span>
       </div>
-      <div style={{ display: "flex", alignItems: "center", gap: 7, height: 40, padding: "0 14px", borderRadius: 11, background: "var(--acc-soft)", border: "1px solid var(--acc-line)", color: "var(--acc)", fontWeight: 700, fontSize: 14 }}><Icon name="bolt" size={15} /> 500</div>
+      <div style={{ display: "flex", alignItems: "center", gap: 7, height: 40, padding: "0 14px", borderRadius: 11, background: "var(--acc-soft)", border: "1px solid var(--acc-line)", color: "var(--acc)", fontWeight: 700, fontSize: 14 }}><Icon name="bolt" size={15} /> {credits ?? "—"}</div>
       <button aria-label="Notifications" className="ab-dash-bell" style={{ width: 40, height: 40, borderRadius: 11, background: "var(--bg-1)", border: "1px solid var(--border)", color: "var(--t-2)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", position: "relative" }}>
         <Icon name="bell" size={18} />
         <span style={{ position: "absolute", top: 9, right: 10, width: 6, height: 6, borderRadius: "50%", background: "var(--acc)", border: "1.5px solid var(--bg-1)" }} />
       </button>
-      <div className="ab-dash-avatar" style={{ width: 38, height: 38, borderRadius: 11, background: "var(--v-blue)", color: "oklch(1 0 0 / 0.95)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 13, border: "1px solid var(--border-mid)" }}>DR</div>
+      <div style={{ position: "relative" }}>
+        <button onClick={() => setMenuOpen((o) => !o)} aria-label="Account menu" className="ab-dash-avatar" style={{ width: 38, height: 38, borderRadius: 11, overflow: "hidden", padding: 0, background: "var(--v-blue)", color: "oklch(1 0 0 / 0.95)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 13, border: "1px solid var(--border-mid)", cursor: "pointer" }}>
+          {user?.avatar ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={user.avatar} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          ) : (
+            ini
+          )}
+        </button>
+        {menuOpen && (
+          <>
+            <div onClick={() => setMenuOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 40 }} />
+            <div style={{ position: "absolute", top: 46, right: 0, width: 220, zIndex: 41, background: "var(--bg-1)", border: "1px solid var(--border)", borderRadius: 14, boxShadow: "var(--sh-2)", padding: 8 }}>
+              <div style={{ padding: "8px 10px 10px" }}>
+                <div style={{ fontSize: 13.5, fontWeight: 600, color: "var(--t-1)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{user?.name || "Account"}</div>
+                <div className="ab-body" style={{ fontSize: 12, marginTop: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{user?.email}</div>
+              </div>
+              <div style={{ height: 1, background: "var(--border)", margin: "2px 4px 6px" }} />
+              <Link href="/dashboard/settings" onClick={() => setMenuOpen(false)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 10px", borderRadius: 9, textDecoration: "none", color: "var(--t-2)", fontSize: 13.5 }}><Icon name="settings" size={16} /> Settings</Link>
+              <form action={logoutAction}>
+                <button type="submit" style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "9px 10px", borderRadius: 9, background: "transparent", border: "none", color: "var(--err)", fontSize: 13.5, fontFamily: "var(--font)", cursor: "pointer", textAlign: "left" }}><Icon name="shield" size={16} /> Log out</button>
+              </form>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }
@@ -165,6 +215,7 @@ function MobileTabBar({ active }: { active: string }) {
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const [credits, setCredits] = useState<number | null>(null);
 
   // Restore collapse preference on first mount (persists across reloads).
   useEffect(() => {
@@ -172,6 +223,21 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       if (localStorage.getItem("dash-collapsed") === "1") setCollapsed(true);
     } catch {}
   }, []);
+
+  // Keep the credit badges fresh. Re-runs on navigation, so the balance
+  // updates after a generation once the user moves to another page.
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (!data.user) return;
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("credits")
+        .eq("id", data.user.id)
+        .single();
+      if (profile) setCredits(profile.credits);
+    });
+  }, [pathname]);
 
   function toggle() {
     setCollapsed((c) => {
@@ -183,9 +249,9 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
   return (
     <div style={{ display: "flex", height: "100dvh", width: "100%", background: "var(--bg)", color: "var(--t-1)", overflow: "hidden", fontFamily: "var(--font)" }}>
-      <Sidebar active={activeFor(pathname)} collapsed={collapsed} />
+      <Sidebar active={activeFor(pathname)} collapsed={collapsed} credits={credits} />
       <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, background: "var(--bg)" }}>
-        <Topbar title={titleFor(pathname)} onToggle={toggle} />
+        <Topbar title={titleFor(pathname)} onToggle={toggle} credits={credits} />
         <div className="ab-scroll" style={{ flex: 1 }}>{children}</div>
         <MobileTabBar active={activeFor(pathname)} />
       </div>

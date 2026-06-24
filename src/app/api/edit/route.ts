@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 import { editImage, type Turn } from "@/lib/gemini";
+import { createClient } from "@/lib/supabase/server";
+import { persistGeneration } from "@/lib/persistGeneration";
+import { reserveCredits, refundCredits, costForTool } from "@/lib/credits";
+import { logGenerationEvent } from "@/lib/genEvents";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -10,6 +14,7 @@ type EditRequest = {
   prompt: string;
   selectionMode?: boolean;
   history?: Turn[];
+  tool?: string;
 };
 
 function buildSelectionPrompt(userPrompt: string): string {
@@ -46,6 +51,21 @@ export async function POST(req: Request) {
     );
   }
 
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+  }
+
+  const cost = costForTool(body.tool);
+  const credits = await reserveCredits(supabase, cost);
+  if (credits === null) {
+    return NextResponse.json(
+      { error: `Not enough credits — this costs ${cost}.` },
+      { status: 402 },
+    );
+  }
+
   const turns: Turn[] = [...(history ?? [])];
 
   turns.push({
@@ -57,8 +77,17 @@ export async function POST(req: Request) {
 
   try {
     const result = await editImage(turns);
-    return NextResponse.json(result);
+    await persistGeneration({
+      imageBase64: result.imageBase64,
+      mimeType: result.mimeType,
+      tool: body.tool ?? "editor",
+      prompt,
+    });
+    await logGenerationEvent(supabase, user.id, body.tool ?? "editor", "success");
+    return NextResponse.json({ ...result, credits });
   } catch (err) {
+    await refundCredits(supabase, cost);
+    await logGenerationEvent(supabase, user.id, body.tool ?? "editor", "failed");
     const message = err instanceof Error ? err.message : "Unknown error";
     return NextResponse.json({ error: message }, { status: 500 });
   }

@@ -7,8 +7,8 @@ import { LangSwitch } from "@/components/landing/Nav";
 import BeforeAfter from "@/components/landing/BeforeAfter";
 
 export function AuthField({
-  label, icon, type = "text", placeholder, defaultValue, trailing,
-}: { label?: string; icon?: string; type?: string; placeholder?: string; defaultValue?: string; trailing?: ReactNode }) {
+  label, icon, type = "text", placeholder, name, defaultValue, required, trailing,
+}: { label?: string; icon?: string; type?: string; placeholder?: string; name?: string; defaultValue?: string; required?: boolean; trailing?: ReactNode }) {
   const [focus, setFocus] = useState(false);
   return (
     <div>
@@ -17,8 +17,10 @@ export function AuthField({
         {icon && <Icon name={icon} size={18} style={{ color: focus ? "var(--acc)" : "var(--t-3)", flexShrink: 0 }} />}
         <input
           type={type}
+          name={name}
           placeholder={placeholder}
           defaultValue={defaultValue}
+          required={required}
           onFocus={() => setFocus(true)}
           onBlur={() => setFocus(false)}
           style={{ flex: 1, minWidth: 0, background: "none", border: "none", outline: "none", color: "var(--t-1)", fontFamily: "var(--font)", fontSize: 14.5, letterSpacing: "-0.01em" }}
@@ -29,7 +31,7 @@ export function AuthField({
   );
 }
 
-export function PwField({ label = "Password", placeholder = "••••••••", meter = false }: { label?: string; placeholder?: string; meter?: boolean }) {
+export function PwField({ label = "Password", placeholder = "••••••••", name = "password", meter = false }: { label?: string; placeholder?: string; name?: string; meter?: boolean }) {
   const [show, setShow] = useState(false);
   return (
     <div>
@@ -38,7 +40,8 @@ export function PwField({ label = "Password", placeholder = "••••••�
         icon="lock"
         type={show ? "text" : "password"}
         placeholder={placeholder}
-        defaultValue="artboard2026"
+        name={name}
+        required
         trailing={
           <button onClick={() => setShow((s) => !s)} type="button" style={{ background: "none", border: "none", cursor: "pointer", color: "var(--t-3)", display: "flex", padding: 0 }}>
             <Icon name={show ? "eye-off" : "eye"} size={18} />
@@ -53,28 +56,6 @@ export function PwField({ label = "Password", placeholder = "••••••�
           <span className="ab-mono" style={{ fontSize: 10, color: "var(--acc)" }}>STRONG</span>
         </div>
       )}
-    </div>
-  );
-}
-
-export function SocialRow() {
-  return (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-      {[["Google", "G"], ["Apple", ""]].map(([n, g]) => (
-        <Link key={n} href="/dashboard" className="ab-btn ab-btn-ghost" style={{ height: 46 }}>
-          <span style={{ fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: 15 }}>{g || ""}</span>{n}
-        </Link>
-      ))}
-    </div>
-  );
-}
-
-export function OrDivider() {
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 14, margin: "6px 0" }}>
-      <div style={{ flex: 1, height: 1, background: "var(--border)" }} />
-      <span className="ab-mono" style={{ fontSize: 10, color: "var(--t-4)", letterSpacing: "0.1em" }}>OR</span>
-      <div style={{ flex: 1, height: 1, background: "var(--border)" }} />
     </div>
   );
 }

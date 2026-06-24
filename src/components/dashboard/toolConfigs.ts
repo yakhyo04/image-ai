@@ -24,7 +24,7 @@ export type ToolConfig = {
 export const TOOL_CONFIGS: Record<string, ToolConfig> = {
   interior: {
     active: "interior", title: "Interior Design", tone: "oklch(0.38 0.06 130)",
-    sourceLabel: "Product", sourceHint: "Drop furniture / decor", cost: 6,
+    sourceLabel: "Product", sourceHint: "Drop furniture / decor", cost: 10,
     canvasMeta: "Scandi · 3:4 · staged", beforeLabel: "Plain product", afterLabel: "Staged room", ratio: "4/3",
     sections: [
       { label: "Room style", type: "presets", cols: 3, items: [
@@ -45,7 +45,7 @@ export const TOOL_CONFIGS: Record<string, ToolConfig> = {
   },
   mockups: {
     active: "mockups", title: "Product Mockups", tone: "oklch(0.36 0.07 300)",
-    sourceLabel: "Artwork", sourceHint: "Drop label / design", cost: 5,
+    sourceLabel: "Artwork", sourceHint: "Drop label / design", cost: 10,
     canvasMeta: "Packaging · 1:1 · studio", beforeLabel: "Flat artwork", afterLabel: "Mockup", ratio: "1/1",
     sections: [
       { label: "Surface", type: "presets", cols: 4, items: [
@@ -65,7 +65,7 @@ export const TOOL_CONFIGS: Record<string, ToolConfig> = {
   },
   backgrounds: {
     active: "backgrounds", title: "Background Replacement", tone: "oklch(0.36 0.06 250)",
-    sourceLabel: "Product photo", sourceHint: "Drop any photo", cost: 3,
+    sourceLabel: "Product photo", sourceHint: "Drop any photo", cost: 10,
     canvasMeta: "Pure white · 3:4 · cutout", beforeLabel: "Busy background", afterLabel: "Clean backdrop",
     sections: [
       { label: "Backdrop", type: "presets", cols: 3, items: [

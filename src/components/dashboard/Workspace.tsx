@@ -181,7 +181,7 @@ export default function Workspace() {
           )}
 
           <button onClick={generate} disabled={busy} className="ab-btn ab-btn-primary ab-btn-full ab-btn-lg" style={{ marginTop: 20, opacity: busy ? 0.7 : 1 }}>
-            {busy ? <><span style={{ width: 15, height: 15, borderRadius: "50%", border: "2px solid var(--acc-ink)", borderTopColor: "transparent", animation: "ab-spin .7s linear infinite" }} /> Generating…</> : <><Icon name="sparkle-fill" size={18} /> Generate · 5 credits</>}
+            {busy ? <><span style={{ width: 15, height: 15, borderRadius: "50%", border: "2px solid var(--acc-ink)", borderTopColor: "transparent", animation: "ab-spin .7s linear infinite" }} /> Generating…</> : <><Icon name="sparkle-fill" size={18} /> Generate · 10 credits</>}
           </button>
           {error && <div style={{ marginTop: 12, padding: "10px 12px", borderRadius: 10, background: "oklch(0.7 0.21 22 / 0.12)", border: "1px solid oklch(0.7 0.21 22 / 0.4)", color: "var(--err)", fontSize: 12.5 }}>{error}</div>}
         </div>

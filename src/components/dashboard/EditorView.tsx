@@ -64,7 +64,7 @@ export default function EditorView() {
       const res = await fetch("/api/edit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ imageBase64: base64, imageMimeType: mimeType, prompt: prompt.trim(), selectionMode: !!masked }),
+        body: JSON.stringify({ imageBase64: base64, imageMimeType: mimeType, prompt: prompt.trim(), selectionMode: !!masked, tool: "editor" }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? `HTTP ${res.status}`);
@@ -135,7 +135,7 @@ export default function EditorView() {
           />
 
           <button onClick={apply} disabled={busy || !image || !prompt.trim()} className="ab-btn ab-btn-primary ab-btn-full ab-btn-lg" style={{ marginTop: 16, opacity: busy || !image || !prompt.trim() ? 0.6 : 1 }}>
-            {busy ? <><span style={{ width: 15, height: 15, borderRadius: "50%", border: "2px solid var(--acc-ink)", borderTopColor: "transparent", animation: "ab-spin .7s linear infinite" }} /> Applying…</> : <><Icon name="magic" size={18} /> Apply edit · 4 credits</>}
+            {busy ? <><span style={{ width: 15, height: 15, borderRadius: "50%", border: "2px solid var(--acc-ink)", borderTopColor: "transparent", animation: "ab-spin .7s linear infinite" }} /> Applying…</> : <><Icon name="magic" size={18} /> Apply edit · 5 credits</>}
           </button>
           {error && <div style={{ marginTop: 12, padding: "10px 12px", borderRadius: 10, background: "oklch(0.7 0.21 22 / 0.12)", border: "1px solid oklch(0.7 0.21 22 / 0.4)", color: "var(--err)", fontSize: 12.5 }}>{error}</div>}
         </div>
