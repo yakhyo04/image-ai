@@ -28,7 +28,24 @@ export type InfographicStyle =
   | "moss"
   | "wardrobe"
   | "specsheet"
-  | "specsheet2";
+  | "specsheet2"
+  | "spiral"
+  | "hanger"
+  | "cozy"
+  | "cloud"
+  | "storm"
+  | "royal"
+  | "atelier"
+  | "claymorphism"
+  | "boutique"
+  | "palette"
+  | "lookbook"
+  | "arc"
+  | "silk"
+  | "ribbed"
+  | "brandkit"
+  | "moda"
+  | "muslin";
 
 export type InfographicStyleMeta = {
   id: InfographicStyle;
@@ -37,6 +54,91 @@ export type InfographicStyleMeta = {
 };
 
 export const INFOGRAPHIC_STYLE_META: InfographicStyleMeta[] = [
+  {
+    id: "muslin",
+    label: "muslin",
+    hint: "muslin",
+  },
+  {
+    id: "moda",
+    label: "moda",
+    hint: "moda",
+  },
+  {
+    id: "brandkit",
+    label: "brandkit",
+    hint: "brandkit",
+  },
+  {
+    id: "ribbed",
+    label: "ribbed",
+    hint: "ribbed",
+  },
+  {
+    id: "silk",
+    label: "silk",
+    hint: "silk",
+  },
+  {
+    id: "arc",
+    label: "arc",
+    hint: "arc",
+  },
+  {
+    id: "boutique",
+    label: "boutique",
+    hint: "boutique",
+  },
+  {
+    id: "claymorphism",
+    label: "claymorphism",
+    hint: "claymorphism",
+  },
+  {
+    id: "palette",
+    label: "palette",
+    hint: "palette",
+  },
+  {
+    id: "lookbook",
+    label: "lookbook",
+    hint: "lookbook",
+  },
+  {
+    id: "atelier",
+    label: "atelier",
+    hint: "atelier",
+  },
+  {
+    id: "hanger",
+    label: "hanger",
+    hint: "hanger",
+  },
+  {
+    id: "cozy",
+    label: "cozy",
+    hint: "cozy",
+  },
+  {
+    id: "cloud",
+    label: "cloud",
+    hint: "cloud",
+  },
+  {
+    id: "storm",
+    label: "storm",
+    hint: "storm",
+  },
+  {
+    id: "royal",
+    label: "royal",
+    hint: "royal",
+  },
+  {
+    id: "spiral",
+    label: "spiral",
+    hint: "spiral",
+  },
   {
     id: "glass",
     label: "Glassmorphism",
