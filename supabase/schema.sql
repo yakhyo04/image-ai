@@ -57,6 +57,17 @@ begin
     raise exception 'INSUFFICIENT_CREDITS';
   end if;
 
+  -- Record the movement so it shows up in the Credits transaction history.
+  -- A negative cost is a refund (positive amount), a positive cost a spend.
+  insert into public.credit_transactions (user_id, amount, kind, source, balance_after)
+  values (
+    auth.uid(),
+    -cost,
+    case when cost < 0 then 'refund' else 'spend' end,
+    'generation',
+    remaining
+  );
+
   return remaining;
 end;
 $$;
@@ -147,6 +158,92 @@ drop policy if exists "Users can insert their own generation events" on public.g
 create policy "Users can insert their own generation events"
   on public.generation_events for insert
   with check (auth.uid() = user_id);
+
+-- ─────────────────────────────────────────────────────────────
+-- Billing (Polar) — subscription state lives on the profile; the
+-- ledger and event tables are written ONLY by the Polar webhook via
+-- the service role. Clients can read their own rows but never write.
+-- ─────────────────────────────────────────────────────────────
+
+-- Subscription / customer state attached to each profile.
+alter table public.profiles add column if not exists plan                text;
+alter table public.profiles add column if not exists subscription_id     text;
+alter table public.profiles add column if not exists subscription_status text;
+alter table public.profiles add column if not exists current_period_end  timestamptz;
+
+-- A row per credit movement (purchase, monthly grant, spend, refund).
+-- Powers the real transaction history on the Credits page.
+create table if not exists public.credit_transactions (
+  id             uuid primary key default gen_random_uuid(),
+  user_id        uuid not null references auth.users (id) on delete cascade,
+  amount         integer not null,                 -- positive = credit, negative = debit
+  kind           text not null,                    -- purchase | grant | spend | refund
+  source         text,                             -- e.g. polar_order, subscription, signup
+  polar_order_id text,
+  description    text,
+  balance_after  integer,
+  created_at     timestamptz not null default now()
+);
+
+create index if not exists credit_transactions_user_idx
+  on public.credit_transactions (user_id, created_at desc);
+
+alter table public.credit_transactions enable row level security;
+
+-- Owners may read their ledger; nobody may write it from the client.
+drop policy if exists "Users can read their own credit transactions" on public.credit_transactions;
+create policy "Users can read their own credit transactions"
+  on public.credit_transactions for select
+  using (auth.uid() = user_id);
+
+-- Idempotency guard: Polar retries webhook deliveries, so every event id
+-- is recorded once and re-deliveries are ignored.
+create table if not exists public.processed_webhook_events (
+  event_id    text primary key,
+  type        text,
+  created_at  timestamptz not null default now()
+);
+
+alter table public.processed_webhook_events enable row level security;
+-- No policies → only the service role (which bypasses RLS) can touch it.
+
+-- Grant credits to a user and record the movement in one transaction.
+-- Locked down to the service role; the webhook is the only caller.
+create or replace function public.grant_credits(
+  p_user_id        uuid,
+  p_amount         integer,
+  p_kind           text default 'purchase',
+  p_source         text default null,
+  p_polar_order_id text default null,
+  p_description    text default null
+)
+returns integer
+language plpgsql
+security definer set search_path = public
+as $$
+declare
+  new_balance integer;
+begin
+  update public.profiles
+     set credits = credits + p_amount
+   where id = p_user_id
+  returning credits into new_balance;
+
+  if new_balance is null then
+    raise exception 'PROFILE_NOT_FOUND: %', p_user_id;
+  end if;
+
+  insert into public.credit_transactions
+    (user_id, amount, kind, source, polar_order_id, description, balance_after)
+  values
+    (p_user_id, p_amount, p_kind, p_source, p_polar_order_id, p_description, new_balance);
+
+  return new_balance;
+end;
+$$;
+
+revoke all on function public.grant_credits(uuid, integer, text, text, text, text) from public, anon, authenticated;
+grant execute on function public.grant_credits(uuid, integer, text, text, text, text) to service_role;
 
 -- ─────────────────────────────────────────────────────────────
 -- Storage bucket: generations (private). Each user owns the folder

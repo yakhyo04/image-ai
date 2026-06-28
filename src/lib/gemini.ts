@@ -20,8 +20,10 @@ export const ai = new GoogleGenAI(
   useVertex ? { apiKey, vertexai: true } : { apiKey },
 );
 
-export const IMAGE_MODEL = "gemini-3-pro-image-preview";
-export const INFOGRAPHIC_MODEL = "gemini-3-pro-image-preview";
+// "Nano Banana" (Gemini 2.5 Flash Image) — cheaper. Switch back to the more
+// expensive "Nano Banana Pro" ("gemini-3-pro-image-preview") later.
+export const IMAGE_MODEL = "gemini-2.5-flash-image";
+export const INFOGRAPHIC_MODEL = "gemini-2.5-flash-image";
 /** Cheap text+vision model used for the pre-pass product analysis. */
 export const VISION_MODEL = "gemini-2.5-flash";
 

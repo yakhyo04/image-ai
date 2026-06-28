@@ -224,14 +224,16 @@ body {
   .ab-dash-progress { grid-template-columns: 1fr !important; }
   .ab-dash-stats { grid-template-columns: 1fr 1fr !important; }
   .ab-dash-masonry { column-count: 3 !important; }
-  .ab-dash-search { display: none !important; }
+  .ab-dash-grid { grid-template-columns: repeat(3, 1fr) !important; }
   .ab-dash-tools { grid-template-columns: repeat(3, 1fr) !important; }
   .ab-dash-home-grid { grid-template-columns: 1fr !important; }
+  .ab-dash-detail { grid-template-columns: 1fr !important; }
   .ab-dash-settings { grid-template-columns: 1fr !important; }
   .ab-settings-nav { display: flex; flex-wrap: wrap; gap: 6px; border-right: none !important; border-bottom: 1px solid var(--border); }
 }
 @media (max-width: 680px) {
   .ab-dash-masonry { column-count: 2 !important; }
+  .ab-dash-grid { grid-template-columns: repeat(2, 1fr) !important; }
   .ab-dash-tools { grid-template-columns: repeat(2, 1fr) !important; }
 }
 

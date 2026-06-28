@@ -132,11 +132,7 @@ function Topbar({ title, onToggle, credits, user }: { title: string; onToggle: (
       <span className="ab-dash-mobile-brand" style={{ display: "none" }}><ArtboardMark size={20} mono /></span>
       <div className="ab-dash-title" style={{ fontSize: 16, fontWeight: 600, letterSpacing: "-0.02em", minWidth: 0 }}>{title}</div>
       <div className="ab-dash-spacer" style={{ flex: 1 }} />
-      <div className="ab-dash-search" style={{ display: "flex", alignItems: "center", gap: 8, width: 240, height: 40, padding: "0 14px", borderRadius: 11, background: "var(--bg-1)", border: "1px solid var(--border)", color: "var(--t-3)" }}>
-        <Icon name="search" size={16} /><span style={{ fontSize: 13 }}>Search generations…</span>
-        <span style={{ marginLeft: "auto", fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--t-4)", border: "1px solid var(--border-mid)", borderRadius: 5, padding: "1px 5px" }}>⌘K</span>
-      </div>
-      <div style={{ display: "flex", alignItems: "center", gap: 7, height: 40, padding: "0 14px", borderRadius: 11, background: "var(--acc-soft)", border: "1px solid var(--acc-line)", color: "var(--acc)", fontWeight: 700, fontSize: 14 }}><Icon name="bolt" size={15} /> {credits ?? "—"}</div>
+      <Link href="/dashboard/credits" title="Credits & billing" style={{ display: "flex", alignItems: "center", gap: 7, height: 40, padding: "0 14px", borderRadius: 11, background: "var(--acc-soft)", border: "1px solid var(--acc-line)", color: "var(--acc)", fontWeight: 700, fontSize: 14, textDecoration: "none" }}><Icon name="bolt" size={15} /> {credits ?? "—"}</Link>
       <button aria-label="Notifications" className="ab-dash-bell" style={{ width: 40, height: 40, borderRadius: 11, background: "var(--bg-1)", border: "1px solid var(--border)", color: "var(--t-2)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", position: "relative" }}>
         <Icon name="bell" size={18} />
         <span style={{ position: "absolute", top: 9, right: 10, width: 6, height: 6, borderRadius: "50%", background: "var(--acc)", border: "1.5px solid var(--bg-1)" }} />

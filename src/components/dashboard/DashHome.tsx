@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { Icon } from "@/components/landing/ui";
 import DashFrame from "./DashFrame";
-import { costForTool } from "@/lib/credits";
 import type { GalleryItem } from "@/lib/generations";
 
 const TOOLS = [
@@ -12,8 +11,6 @@ const TOOLS = [
   { id: "backgrounds", icon: "scissors", title: "Backgrounds", tone: "oklch(0.34 0.06 250)", href: "/dashboard/backgrounds" },
   { id: "patterns", icon: "palette", title: "Patterns", tone: "oklch(0.34 0.08 70)", href: "/dashboard/patterns", neu: true },
 ] as const;
-
-const MONTHLY_ALLOWANCE = 30;
 
 const TOOL_LABEL: Record<string, string> = {
   infographics: "Infographic", editor: "Photo edit", interior: "Interior",
@@ -41,13 +38,13 @@ export default function DashHome({ name, credits, items, successRate }: { name: 
 
   const now = Date.now();
   const weekAgo = now - 7 * 86_400_000;
-  const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).getTime();
   const ts = (i: GalleryItem) => new Date(i.createdAt).getTime();
 
   const weekItems = items.filter((i) => ts(i) >= weekAgo);
-  const monthItems = items.filter((i) => ts(i) >= monthStart);
-  const usedThisMonth = monthItems.reduce((sum, i) => sum + costForTool(i.tool ?? undefined), 0);
-  const usedPct = Math.min(100, Math.round((usedThisMonth / MONTHLY_ALLOWANCE) * 100));
+  // Credits accumulate across purchases, so the nudge is driven by the actual
+  // remaining balance rather than a fixed monthly allowance.
+  const approxGens = Math.floor(credits / 10);
+  const lowCredits = credits < 20;
 
   const STATS = [
     { v: String(items.length), l: "Total generations", sub: "All time", acc: false },
@@ -127,14 +124,14 @@ export default function DashHome({ name, credits, items, successRate }: { name: 
             ) : (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 12 }}>
                 {recent.map((g) => (
-                  <div key={g.id}>
+                  <Link key={g.id} href={`/dashboard/gallery/${g.id}`} style={{ textDecoration: "none", color: "inherit" }}>
                     <div style={{ aspectRatio: "3/4", borderRadius: 12, background: TOOL_TONE[g.tool ?? ""] ?? "var(--bg-3)", border: "1px solid var(--border-mid)", position: "relative", overflow: "hidden" }}>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={g.url} alt={TOOL_LABEL[g.tool ?? ""] ?? "Generation"} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+                      <img src={g.url} alt={TOOL_LABEL[g.tool ?? ""] ?? "Generation"} loading="lazy" decoding="async" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
                     </div>
                     <div style={{ fontSize: 12, fontWeight: 600, marginTop: 7, letterSpacing: "-0.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{TOOL_LABEL[g.tool ?? ""] ?? "Image"}</div>
                     <div className="ab-mono" style={{ fontSize: 9.5, color: "var(--t-3)", marginTop: 1 }}>{ago(g.createdAt)} ago</div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             )}
@@ -179,11 +176,11 @@ export default function DashHome({ name, credits, items, successRate }: { name: 
             <div style={{ marginTop: 16, padding: 18, borderRadius: 16, background: "linear-gradient(160deg, var(--acc-soft), transparent)", border: "1px solid var(--acc-line)", position: "relative", overflow: "hidden" }}>
               <div className="ab-glow" style={{ width: 120, height: 120, background: "var(--acc)", bottom: -50, right: -30, opacity: 0.25 }} />
               <div style={{ position: "relative" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 14, fontWeight: 700 }}><Icon name="crown" size={16} style={{ color: "var(--acc)" }} /> {usedPct >= 70 ? "Going fast" : "Your credits"}</div>
+                <div style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 14, fontWeight: 700 }}><Icon name="crown" size={16} style={{ color: "var(--acc)" }} /> {lowCredits ? "Running low" : "Your credits"}</div>
                 <div className="ab-body" style={{ fontSize: 12.5, marginTop: 6 }}>
-                  {usedThisMonth === 0
-                    ? `All ${MONTHLY_ALLOWANCE} monthly credits are ready to use.`
-                    : `You’ve used ${usedPct}% of this month’s credits (${usedThisMonth}/${MONTHLY_ALLOWANCE}).`}
+                  {lowCredits
+                    ? `Only ${credits} credits left — top up to keep generating.`
+                    : `You have ${credits} credits — about ${approxGens} more ${approxGens === 1 ? "generation" : "generations"}.`}
                 </div>
                 <Link href="/dashboard/credits" className="ab-btn ab-btn-primary ab-btn-sm" style={{ marginTop: 12 }}>Buy credits</Link>
               </div>

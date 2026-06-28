@@ -11,8 +11,6 @@ export const SETTINGS_NAV = [
   { id: "brand", icon: "palette", label: "Brand kit", href: "/dashboard/settings/brand" },
   { id: "prefs", icon: "sliders", label: "Preferences", href: "/dashboard/settings/preferences" },
   { id: "notif", icon: "bell", label: "Notifications", href: "/dashboard/settings/notifications" },
-  { id: "api", icon: "bolt", label: "API access", href: "/dashboard/settings/api" },
-  { id: "team", icon: "grid", label: "Team", href: "/dashboard/settings/team" },
 ];
 
 export function SettingsScaffold({ active, title, sub, children, footer = true }: { active: string; title: string; sub: string; children: ReactNode; footer?: boolean }) {
