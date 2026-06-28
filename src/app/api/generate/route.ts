@@ -29,13 +29,21 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  const credits = await reserveCredits(supabase);
-  if (credits === null) {
+  const reserved = await reserveCredits(supabase);
+  if (!reserved.ok) {
+    if (reserved.reason === "insufficient") {
+      return NextResponse.json(
+        { error: `Not enough credits — each generation costs ${GENERATION_COST}.` },
+        { status: 402 },
+      );
+    }
+    console.error("[/api/generate] credit reservation failed:", reserved.message);
     return NextResponse.json(
-      { error: `Not enough credits — each generation costs ${GENERATION_COST}.` },
-      { status: 402 },
+      { error: "Couldn't reserve credits — please try again." },
+      { status: 503 },
     );
   }
+  const credits = reserved.balance;
 
   // Text-only turn → the image model generates from the prompt alone.
   const turns: Turn[] = [{ role: "user", text: prompt }];

@@ -4,7 +4,7 @@ import { updateSession } from "@/lib/supabase/proxy";
 const AUTH_PAGES = ["/login", "/signup", "/forgot-password"];
 
 function isProtected(pathname: string): boolean {
-  return pathname === "/app" || pathname.startsWith("/dashboard");
+  return pathname.startsWith("/dashboard");
 }
 
 // Next 16 renamed `middleware` → `proxy`. Runs before render to refresh the
@@ -31,8 +31,9 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    // Run on everything except Next internals, the OAuth callback, and static assets.
-    "/((?!_next/static|_next/image|auth/callback|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
-  ],
+  // Only run where an auth decision is actually made: the gated app and the
+  // auth pages (to bounce signed-in users away). Public pages — the landing,
+  // /tools/*, API routes — no longer pay a Supabase getUser() round-trip on
+  // every request.
+  matcher: ["/dashboard/:path*", "/login", "/signup", "/forgot-password"],
 };

@@ -5,6 +5,7 @@ import { Icon } from "@/components/landing/ui";
 import DashFrame from "./DashFrame";
 import { resizeAndEncodeImage, downloadDataUrl, type InlineImage } from "./lib";
 import type { InfographicStyle } from "@/lib/infographicStyles";
+import { useCredits } from "@/store/credits";
 
 // design preset → real infographic style id
 const PRESETS: { t: string; tone: string; style: InfographicStyle }[] = [
@@ -36,6 +37,7 @@ export default function Workspace() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<string | null>(null);
   const [variations, setVariations] = useState<string[]>([]);
+  const setCredits = useCredits((s) => s.setCredits);
   const fileRef = useRef<HTMLInputElement>(null);
 
   async function addFiles(files: FileList | File[]) {
@@ -88,6 +90,7 @@ export default function Workspace() {
       const dataUrl = `data:${data.mimeType};base64,${data.imageBase64}`;
       setResult(dataUrl);
       setVariations((prev) => [dataUrl, ...prev].slice(0, 8));
+      if (typeof data.credits === "number") setCredits(data.credits);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Generation failed");
     } finally {

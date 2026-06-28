@@ -82,13 +82,21 @@ export async function POST(req: Request) {
     ? (language as InfographicLanguage)
     : "en";
 
-  const credits = await reserveCredits(supabase);
-  if (credits === null) {
+  const reserved = await reserveCredits(supabase);
+  if (!reserved.ok) {
+    if (reserved.reason === "insufficient") {
+      return NextResponse.json(
+        { error: `Not enough credits — each generation costs ${GENERATION_COST}.` },
+        { status: 402 },
+      );
+    }
+    console.error("[/api/infographic] credit reservation failed:", reserved.message);
     return NextResponse.json(
-      { error: `Not enough credits — each generation costs ${GENERATION_COST}.` },
-      { status: 402 },
+      { error: "Couldn't reserve credits — please try again." },
+      { status: 503 },
     );
   }
+  const credits = reserved.balance;
 
   try {
     const result = await generateInfographic({

@@ -58,13 +58,21 @@ export async function POST(req: Request) {
   }
 
   const cost = costForTool(body.tool);
-  const credits = await reserveCredits(supabase, cost);
-  if (credits === null) {
+  const reserved = await reserveCredits(supabase, cost);
+  if (!reserved.ok) {
+    if (reserved.reason === "insufficient") {
+      return NextResponse.json(
+        { error: `Not enough credits — this costs ${cost}.` },
+        { status: 402 },
+      );
+    }
+    console.error("[/api/edit] credit reservation failed:", reserved.message);
     return NextResponse.json(
-      { error: `Not enough credits — this costs ${cost}.` },
-      { status: 402 },
+      { error: "Couldn't reserve credits — please try again." },
+      { status: 503 },
     );
   }
+  const credits = reserved.balance;
 
   const turns: Turn[] = [...(history ?? [])];
 

@@ -6,6 +6,7 @@ import DashFrame from "./DashFrame";
 import { PresetGrid, ChipRow, SegRow } from "./controls";
 import { resizeAndEncodeImage, downloadDataUrl, type InlineImage } from "./lib";
 import { TOOL_CONFIGS, type ToolSection } from "./toolConfigs";
+import { useCredits } from "@/store/credits";
 
 function sectionDefault(s: ToolSection) {
   return s.def ?? (s.type === "seg" ? 1 : 0);
@@ -22,6 +23,7 @@ export default function ToolWorkspace({ toolKey }: { toolKey: string }) {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<string | null>(null);
   const [variations, setVariations] = useState<string[]>([]);
+  const setCredits = useCredits((s) => s.setCredits);
   const fileRef = useRef<HTMLInputElement>(null);
 
   function setSel(i: number, v: number) {
@@ -72,6 +74,7 @@ export default function ToolWorkspace({ toolKey }: { toolKey: string }) {
       const dataUrl = `data:${data.mimeType};base64,${data.imageBase64}`;
       setResult(dataUrl);
       setVariations((prev) => [dataUrl, ...prev].slice(0, 8));
+      if (typeof data.credits === "number") setCredits(data.credits);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Generation failed");
     } finally {

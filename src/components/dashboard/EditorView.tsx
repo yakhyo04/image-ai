@@ -5,6 +5,7 @@ import ImageCanvas, { type ImageCanvasHandle } from "@/components/ImageCanvas";
 import { Icon } from "@/components/landing/ui";
 import DashFrame from "./DashFrame";
 import { resizeAndEncodeImage, dataUrlToParts, downloadDataUrl } from "./lib";
+import { useCredits } from "@/store/credits";
 
 export default function EditorView() {
   const [image, setImage] = useState<string | null>(null);
@@ -16,6 +17,7 @@ export default function EditorView() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [canvasKey, setCanvasKey] = useState(0);
+  const setCredits = useCredits((s) => s.setCredits);
   const canvasRef = useRef<ImageCanvasHandle>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -72,6 +74,7 @@ export default function EditorView() {
       setHistory((prev) => [...prev, next]);
       setPrompt("");
       setCurrent(next);
+      if (typeof data.credits === "number") setCredits(data.credits);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Edit failed");
     } finally {

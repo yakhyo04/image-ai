@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { Icon, ArtboardMark } from "@/components/landing/ui";
 import { createClient } from "@/lib/supabase/client";
 import { logoutAction } from "@/app/actions/auth";
+import { useCredits } from "@/store/credits";
 
 function initials(name: string, email: string): string {
   const src = name.trim() || email.split("@")[0] || "";
@@ -118,19 +119,10 @@ function Sidebar({ active, collapsed, credits }: { active: string; collapsed: bo
   );
 }
 
-function Topbar({ title, onToggle, credits }: { title: string; onToggle: () => void; credits: number | null }) {
-  const [user, setUser] = useState<{ name: string; email: string; avatar: string | null } | null>(null);
-  const [menuOpen, setMenuOpen] = useState(false);
+type DashUser = { name: string; email: string; avatar: string | null };
 
-  useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data }) => {
-      const u = data.user;
-      if (!u) return;
-      const meta = (u.user_metadata ?? {}) as Record<string, string>;
-      setUser({ name: meta.full_name ?? meta.name ?? "", email: u.email ?? "", avatar: meta.avatar_url ?? null });
-    });
-  }, []);
+function Topbar({ title, onToggle, credits, user }: { title: string; onToggle: () => void; credits: number | null; user: DashUser | null }) {
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const ini = user ? initials(user.name, user.email) : "··";
 
@@ -215,7 +207,10 @@ function MobileTabBar({ active }: { active: string }) {
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
-  const [credits, setCredits] = useState<number | null>(null);
+  const credits = useCredits((s) => s.credits);
+  const setCredits = useCredits((s) => s.setCredits);
+  const [user, setUser] = useState<DashUser | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
 
   // Restore collapse preference on first mount (persists across reloads).
   useEffect(() => {
@@ -224,20 +219,34 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     } catch {}
   }, []);
 
-  // Keep the credit badges fresh. Re-runs on navigation, so the balance
-  // updates after a generation once the user moves to another page.
+  // Resolve the signed-in user ONCE. getUser() validates the token against the
+  // Supabase Auth server (a network round-trip), so we never want it on every
+  // navigation — identity doesn't change between pages.
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getUser().then(async ({ data }) => {
-      if (!data.user) return;
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("credits")
-        .eq("id", data.user.id)
-        .single();
-      if (profile) setCredits(profile.credits);
+    supabase.auth.getUser().then(({ data }) => {
+      const u = data.user;
+      if (!u) return;
+      const meta = (u.user_metadata ?? {}) as Record<string, string>;
+      setUser({ name: meta.full_name ?? meta.name ?? "", email: u.email ?? "", avatar: meta.avatar_url ?? null });
+      setUserId(u.id);
     });
-  }, [pathname]);
+  }, []);
+
+  // Refresh the credit badge on navigation using the cached user id — a cheap
+  // profiles read, with no getUser() round-trip.
+  useEffect(() => {
+    if (!userId) return;
+    const supabase = createClient();
+    supabase
+      .from("profiles")
+      .select("credits")
+      .eq("id", userId)
+      .single()
+      .then(({ data: profile }) => {
+        if (profile) setCredits(profile.credits);
+      });
+  }, [userId, pathname]);
 
   function toggle() {
     setCollapsed((c) => {
@@ -251,7 +260,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     <div style={{ display: "flex", height: "100dvh", width: "100%", background: "var(--bg)", color: "var(--t-1)", overflow: "hidden", fontFamily: "var(--font)" }}>
       <Sidebar active={activeFor(pathname)} collapsed={collapsed} credits={credits} />
       <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, background: "var(--bg)" }}>
-        <Topbar title={titleFor(pathname)} onToggle={toggle} credits={credits} />
+        <Topbar title={titleFor(pathname)} onToggle={toggle} credits={credits} user={user} />
         <div className="ab-scroll" style={{ flex: 1 }}>{children}</div>
         <MobileTabBar active={activeFor(pathname)} />
       </div>

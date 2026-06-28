@@ -5,6 +5,7 @@ import { Icon } from "@/components/landing/ui";
 import DashFrame from "./DashFrame";
 import { ChipRow, SegRow } from "./controls";
 import { downloadDataUrl } from "./lib";
+import { useCredits } from "@/store/credits";
 
 /** CSS-only pattern tile so empty/placeholder previews read as a real repeat. */
 function patternBg(hue: number, light = 0.42): CSSProperties {
@@ -53,6 +54,7 @@ export default function DashPatterns() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<string | null>(null);
   const [tiles, setTiles] = useState<string[]>([]);
+  const setCredits = useCredits((s) => s.setCredits);
 
   const hue = MOTIFS[motif].hue;
   const tilePx = [34, 48, 72][scale];
@@ -81,6 +83,7 @@ export default function DashPatterns() {
       const dataUrl = `data:${data.mimeType};base64,${data.imageBase64}`;
       setResult(dataUrl);
       setTiles((prev) => [dataUrl, ...prev].slice(0, 6));
+      if (typeof data.credits === "number") setCredits(data.credits);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Generation failed");
     } finally {
