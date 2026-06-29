@@ -14,8 +14,11 @@ const TOOL_LABELS: Record<string, string> = {
   mockups: "Mockup",
   backgrounds: "Background",
   patterns: "Pattern",
+  video: "Video",
 };
-const FILTERS = ["All", "Infographics", "Interiors", "Mockups", "Backgrounds", "Patterns", "Edits"];
+const FILTERS = ["All", "Infographics", "Videos", "Interiors", "Mockups", "Backgrounds", "Patterns", "Edits"];
+
+const isVideo = (it: GalleryItem) => (it.mimeType ?? "").startsWith("video");
 const TONES = ["oklch(0.34 0.07 200)", "oklch(0.33 0.06 130)", "oklch(0.32 0.07 300)", "oklch(0.34 0.08 70)", "oklch(0.36 0.08 25)"];
 
 function relativeWhen(iso: string): string {
@@ -31,6 +34,7 @@ function filterMatches(filter: string, tool: string | null): boolean {
   if (filter === "All") return true;
   const map: Record<string, string> = {
     Infographics: "infographics",
+    Videos: "video",
     Interiors: "interior",
     Mockups: "mockups",
     Backgrounds: "backgrounds",
@@ -66,6 +70,32 @@ export default function GalleryView({ items }: { items: GalleryItem[] }) {
       </div>
     </>
   );
+
+  // Inner content of a gallery card — image or video first frame, with a play
+  // badge over videos. `mode` controls cover-fill (grid) vs natural-height
+  // (masonry).
+  const tileInner = (it: GalleryItem, i: number, mode: "grid" | "masonry") => {
+    const mediaStyle =
+      mode === "grid"
+        ? ({ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" } as const)
+        : ({ display: "block", width: "100%", height: "auto" } as const);
+    return (
+      <div style={{ ...(mode === "grid" ? { aspectRatio: "3 / 4" } : {}), background: TONES[i % 5], position: "relative" }}>
+        {isVideo(it) ? (
+          <video src={it.url} muted loop playsInline preload="metadata" style={mediaStyle} />
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={it.url} alt={TOOL_LABELS[it.tool ?? ""] ?? "Generation"} loading="lazy" decoding="async" style={mediaStyle} />
+        )}
+        {isVideo(it) && (
+          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
+            <span style={{ width: 44, height: 44, borderRadius: "50%", background: "oklch(0 0 0 / 0.5)", backdropFilter: "blur(6px)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon name="play" size={20} /></span>
+          </div>
+        )}
+        {badges(it)}
+      </div>
+    );
+  };
 
   return (
     <DashFrame active="gallery" title="Gallery / History">
@@ -131,11 +161,7 @@ export default function GalleryView({ items }: { items: GalleryItem[] }) {
           <div className="ab-dash-grid" style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 16 }}>
             {shown.map((it, i) => (
               <Link key={it.id} href={`/dashboard/gallery/${it.id}`} style={{ display: "block", borderRadius: 14, overflow: "hidden", border: "1px solid var(--border-mid)", position: "relative", cursor: "pointer", textDecoration: "none" }}>
-                <div style={{ aspectRatio: "3 / 4", background: TONES[i % 5], position: "relative" }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={it.url} alt={TOOL_LABELS[it.tool ?? ""] ?? "Generation"} loading="lazy" decoding="async" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
-                  {badges(it)}
-                </div>
+                {tileInner(it, i, "grid")}
               </Link>
             ))}
           </div>
@@ -144,11 +170,7 @@ export default function GalleryView({ items }: { items: GalleryItem[] }) {
           <div className="ab-dash-masonry" style={{ columnCount: 5, columnGap: 16 }}>
             {shown.map((it, i) => (
               <Link key={it.id} href={`/dashboard/gallery/${it.id}`} style={{ display: "block", breakInside: "avoid", marginBottom: 16, borderRadius: 14, overflow: "hidden", border: "1px solid var(--border-mid)", position: "relative", cursor: "pointer", textDecoration: "none" }}>
-                <div style={{ background: TONES[i % 5], position: "relative" }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={it.url} alt={TOOL_LABELS[it.tool ?? ""] ?? "Generation"} loading="lazy" decoding="async" style={{ display: "block", width: "100%", height: "auto" }} />
-                  {badges(it)}
-                </div>
+                {tileInner(it, i, "masonry")}
               </Link>
             ))}
           </div>

@@ -4,6 +4,9 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 export const GENERATION_COST = 10;
 // The photo editor is cheaper than a full generation.
 export const EDITOR_COST = 5;
+// A 5-second Veo video costs far more to run than an image, so it's priced
+// higher. Adjust freely — this is the per-video charge.
+export const VIDEO_COST = 100;
 
 // Cost for a given tool. Editor edits are 5 credits; everything else is 10.
 export function costForTool(tool?: string): number {

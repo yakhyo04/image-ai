@@ -21,6 +21,7 @@ const TOOLS: SidebarItem[] = [
   { id: "dashboard", icon: "dashboard", label: "Dashboard", href: "/dashboard" },
   { id: "infographics", icon: "sliders", label: "Marketplace Infographics", href: "/dashboard/infographics" },
   { id: "editor", icon: "magic", label: "Photo Editor", href: "/dashboard/editor" },
+  { id: "video", icon: "play", label: "Product Video", href: "/dashboard/video", badge: "NEW" },
   { id: "interior", icon: "sofa", label: "Interior Design", href: "/dashboard/interior" },
   { id: "mockups", icon: "box", label: "Product Mockups", href: "/dashboard/mockups" },
   { id: "backgrounds", icon: "scissors", label: "Backgrounds", href: "/dashboard/backgrounds" },
@@ -36,6 +37,7 @@ const TITLES: Record<string, string> = {
   "/dashboard": "Dashboard",
   "/dashboard/infographics": "Marketplace Infographics",
   "/dashboard/editor": "Photo Editor",
+  "/dashboard/video": "Product Video",
   "/dashboard/interior": "Interior Design",
   "/dashboard/mockups": "Product Mockups",
   "/dashboard/backgrounds": "Background Replacement",
@@ -51,6 +53,7 @@ function activeFor(p: string): string {
   if (p.startsWith("/dashboard/credits")) return "credits";
   if (p.startsWith("/dashboard/infographics") || p.startsWith("/dashboard/progress")) return "infographics";
   if (p.startsWith("/dashboard/editor")) return "editor";
+  if (p.startsWith("/dashboard/video")) return "video";
   if (p.startsWith("/dashboard/interior")) return "interior";
   if (p.startsWith("/dashboard/mockups")) return "mockups";
   if (p.startsWith("/dashboard/backgrounds")) return "backgrounds";

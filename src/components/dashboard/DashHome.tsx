@@ -14,15 +14,16 @@ const TOOLS = [
 
 const TOOL_LABEL: Record<string, string> = {
   infographics: "Infographic", editor: "Photo edit", interior: "Interior",
-  mockups: "Mockup", backgrounds: "Background", patterns: "Pattern",
+  mockups: "Mockup", backgrounds: "Background", patterns: "Pattern", video: "Video",
 };
 const TOOL_ICON: Record<string, string> = {
   infographics: "sliders", editor: "magic", interior: "sofa",
-  mockups: "box", backgrounds: "scissors", patterns: "palette",
+  mockups: "box", backgrounds: "scissors", patterns: "palette", video: "play",
 };
 const TOOL_TONE: Record<string, string> = {
   infographics: "oklch(0.34 0.07 200)", editor: "oklch(0.32 0.08 25)", interior: "oklch(0.33 0.06 130)",
   mockups: "oklch(0.32 0.07 300)", backgrounds: "oklch(0.34 0.06 250)", patterns: "oklch(0.34 0.08 70)",
+  video: "oklch(0.33 0.09 330)",
 };
 
 function ago(iso: string): string {
@@ -126,8 +127,15 @@ export default function DashHome({ name, credits, items, successRate }: { name: 
                 {recent.map((g) => (
                   <Link key={g.id} href={`/dashboard/gallery/${g.id}`} style={{ textDecoration: "none", color: "inherit" }}>
                     <div style={{ aspectRatio: "3/4", borderRadius: 12, background: TOOL_TONE[g.tool ?? ""] ?? "var(--bg-3)", border: "1px solid var(--border-mid)", position: "relative", overflow: "hidden" }}>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={g.url} alt={TOOL_LABEL[g.tool ?? ""] ?? "Generation"} loading="lazy" decoding="async" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+                      {(g.mimeType ?? "").startsWith("video") ? (
+                        <>
+                          <video src={g.url} muted loop playsInline preload="metadata" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+                          <span style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: 30, height: 30, borderRadius: "50%", background: "oklch(0 0 0 / 0.5)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon name="play" size={14} /></span>
+                        </>
+                      ) : (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={g.url} alt={TOOL_LABEL[g.tool ?? ""] ?? "Generation"} loading="lazy" decoding="async" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+                      )}
                     </div>
                     <div style={{ fontSize: 12, fontWeight: 600, marginTop: 7, letterSpacing: "-0.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{TOOL_LABEL[g.tool ?? ""] ?? "Image"}</div>
                     <div className="ab-mono" style={{ fontSize: 9.5, color: "var(--t-3)", marginTop: 1 }}>{ago(g.createdAt)} ago</div>

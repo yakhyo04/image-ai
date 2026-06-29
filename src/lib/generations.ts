@@ -5,11 +5,11 @@ export type GalleryItem = {
   url: string;
   tool: string | null;
   createdAt: string;
+  mimeType: string | null;
 };
 
 export type GenerationDetail = GalleryItem & {
   prompt: string | null;
-  mimeType: string | null;
 };
 
 const SIGNED_URL_TTL = 60 * 60; // 1 hour
@@ -25,7 +25,7 @@ export async function listGenerations(): Promise<GalleryItem[]> {
 
   const { data: rows, error } = await supabase
     .from("generations")
-    .select("id, tool, storage_path, created_at")
+    .select("id, tool, storage_path, created_at, mime_type")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
     .limit(200);
@@ -48,6 +48,7 @@ export async function listGenerations(): Promise<GalleryItem[]> {
       url: urlByPath.get(r.storage_path) ?? "",
       tool: r.tool,
       createdAt: r.created_at,
+      mimeType: r.mime_type,
     }))
     .filter((it) => it.url);
 }
