@@ -45,7 +45,15 @@ export type InfographicStyle =
   | "ribbed"
   | "brandkit"
   | "moda"
-  | "muslin";
+  | "muslin"
+  | "boudoir"
+  | "dreamy"
+  | "spa"
+  | "split"
+  | "aqua"
+  | "sunny"
+  | "cascade"
+  | "kicks";
 
 export type InfographicStyleMeta = {
   id: InfographicStyle;
@@ -54,6 +62,46 @@ export type InfographicStyleMeta = {
 };
 
 export const INFOGRAPHIC_STYLE_META: InfographicStyleMeta[] = [
+  {
+    id: "kicks",
+    label: "kicks",
+    hint: "kicks",
+  },
+  {
+    id: "cascade",
+    label: "cascade",
+    hint: "cascade",
+  },
+  {
+    id: "sunny",
+    label: "sunny",
+    hint: "sunny",
+  },
+  {
+    id: "aqua",
+    label: "aqua",
+    hint: "aqua",
+  },
+  {
+    id: "split",
+    label: "split",
+    hint: "split",
+  },
+  {
+    id: "spa",
+    label: "spa",
+    hint: "spa",
+  },
+  {
+    id: "dreamy",
+    label: "dreamy",
+    hint: "dreamy",
+  },
+  {
+    id: "boudoir",
+    label: "boudoir",
+    hint: "boudoir",
+  },
   {
     id: "muslin",
     label: "muslin",
@@ -66,7 +114,7 @@ export const INFOGRAPHIC_STYLE_META: InfographicStyleMeta[] = [
   },
   {
     id: "brandkit",
-    label: "brandkit",
+    label: "❌ brandkit",
     hint: "brandkit",
   },
   {
@@ -81,62 +129,62 @@ export const INFOGRAPHIC_STYLE_META: InfographicStyleMeta[] = [
   },
   {
     id: "arc",
-    label: "arc",
+    label: "✅ arc",
     hint: "arc",
   },
   {
     id: "boutique",
-    label: "boutique",
+    label: "✅ boutique",
     hint: "boutique",
   },
   {
     id: "claymorphism",
-    label: "claymorphism",
+    label: "❌ claymorphism",
     hint: "claymorphism",
   },
   {
     id: "palette",
-    label: "palette",
+    label: "❌ palette",
     hint: "palette",
   },
   {
     id: "lookbook",
-    label: "lookbook",
+    label: "❌ lookbook",
     hint: "lookbook",
   },
   {
     id: "atelier",
-    label: "atelier",
+    label: "❌ atelier",
     hint: "atelier",
   },
   {
     id: "hanger",
-    label: "hanger",
+    label: "❌ hanger",
     hint: "hanger",
   },
   {
     id: "cozy",
-    label: "cozy",
+    label: "❌ cozy",
     hint: "cozy",
   },
   {
     id: "cloud",
-    label: "cloud",
+    label: "❌ cloud",
     hint: "cloud",
   },
   {
     id: "storm",
-    label: "storm",
+    label: "❌ storm",
     hint: "storm",
   },
   {
     id: "royal",
-    label: "royal",
+    label: "❌ royal",
     hint: "royal",
   },
   {
     id: "spiral",
-    label: "spiral",
+    label: "✅ spiral",
     hint: "spiral",
   },
   {
