@@ -1,13 +1,14 @@
 import { GenerateVideosOperation } from "@google/genai";
 import { ai } from "./gemini";
 
-// "Veo 2" — the cheapest Veo tier that supports image-to-video. Swap to a Veo 3
-// model ("veo-3.0-fast-generate-preview" / "veo-3.0-generate-preview") later for
-// higher quality + audio (and higher cost).
-export const VIDEO_MODEL = "veo-2.0-generate-001";
+// Veo 3.1 (fast tier) — image-to-video with audio. This key only has access to
+// the Veo 3.1 family (veo-2.0 returns 404), so "fast" is the best quality/cost
+// balance. Swap to "veo-3.1-generate-preview" for max quality or
+// "veo-3.1-lite-generate-preview" for the cheapest tier.
+export const VIDEO_MODEL = "veo-3.1-fast-generate-preview";
 
-// Seconds per clip. Veo 2 supports 5–8s.
-export const VIDEO_DURATION = 5;
+// Seconds per clip. Veo 3.1 only accepts 4, 6, or 8s (not 5).
+export const VIDEO_DURATION = 8;
 
 export type VideoAspect = "16:9" | "9:16";
 

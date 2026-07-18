@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { startProductVideo, type VideoAspect } from "@/lib/veo";
+import { isolateProductForVideo } from "@/lib/gemini";
 import { createClient } from "@/lib/supabase/server";
 import { reserveCredits, refundCredits, VIDEO_COST } from "@/lib/credits";
 
@@ -50,9 +51,26 @@ export async function POST(req: Request) {
   }
 
   try {
+    // Pre-pass: strip any baked-in text/badges/background and rebuild a clean
+    // product hero shot, so Veo animates the product only — not the source
+    // infographic's text. Falls back to the original image if cleanup fails,
+    // so a video is still produced rather than hard-failing.
+    let videoImageBase64 = imageBase64;
+    let videoImageMime = imageMimeType;
+    try {
+      const cleaned = await isolateProductForVideo(imageBase64, imageMimeType);
+      videoImageBase64 = cleaned.imageBase64;
+      videoImageMime = cleaned.mimeType;
+    } catch (cleanupErr) {
+      console.error(
+        "[/api/video/start] product cleanup failed, using original image:",
+        cleanupErr,
+      );
+    }
+
     const operationName = await startProductVideo({
-      imageBase64,
-      mimeType: imageMimeType,
+      imageBase64: videoImageBase64,
+      mimeType: videoImageMime,
       prompt: body.prompt,
       aspectRatio: body.aspectRatio,
     });
