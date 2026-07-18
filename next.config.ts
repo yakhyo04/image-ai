@@ -1,12 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Allow the Next.js dev server to be reached through ngrok tunnels.
-  // Without this, Next 16 blocks cross-origin dev assets/HMR, the page
-  // loads but never hydrates, and all buttons stop working.
+  // Allow the dev server to be reached through ngrok tunnels. Next.js 16 blocks
+  // cross-origin requests to dev assets by default, which prevents the client
+  // bundle from hydrating (buttons appear dead) when opened on a non-localhost
+  // origin. These wildcards cover the common ngrok hostnames.
   allowedDevOrigins: [
-    "*.ngrok-free.app",
     "*.ngrok-free.dev",
+    "*.ngrok-free.app",
     "*.ngrok.app",
     "*.ngrok.io",
   ],

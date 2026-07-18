@@ -1,5 +1,15 @@
-import { GenerateVideosOperation } from "@google/genai";
-import { ai } from "./gemini";
+import { GenerateVideosOperation, GoogleGenAI } from "@google/genai";
+
+const apiKey = process.env.GEMINI_API_KEY;
+if (!apiKey) {
+  throw new Error("GEMINI_API_KEY is not set in environment");
+}
+
+const useVertex = process.env.GEMINI_USE_VERTEX === "true";
+
+const ai = new GoogleGenAI(
+  useVertex ? { apiKey, vertexai: true } : { apiKey },
+);
 
 // Veo 3.1 (fast tier) — image-to-video with audio. This key only has access to
 // the Veo 3.1 family (veo-2.0 returns 404), so "fast" is the best quality/cost
