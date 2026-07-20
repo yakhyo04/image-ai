@@ -259,6 +259,49 @@ export async function editImage(turns: Turn[]): Promise<EditResult> {
   return extractImage(response);
 }
 
+// Prompt for the video pre-pass. Veo animates the *pixels* of its input image,
+// so if we hand it a finished infographic the text/badges get animated too.
+// This strips everything that isn't the product and rebuilds a clean studio
+// hero shot, which Veo can then animate cleanly with no leftover text.
+const VIDEO_PRODUCT_CLEANUP_PROMPT = [
+  "Recreate this image as a single clean, premium product hero shot for a",
+  "commercial video.",
+  "",
+  "KEEP THE PRODUCT EXACTLY AS SHOWN — identical shape, colors, materials,",
+  "logos, printed labels, stitching, proportions and every physical detail.",
+  "Do not restyle, recolor, or redesign the product.",
+  "",
+  "REMOVE everything that is not the product itself: all text, titles,",
+  "captions, feature callouts, badges, price/size bubbles, icons, arrows,",
+  "UI panels, frames, borders, watermarks and any decorative graphic overlays.",
+  "",
+  "Place the product centered on a clean, elegant studio background with a soft",
+  "gradient, gentle lighting, subtle reflections and a soft contact shadow, so",
+  "it reads as a high-end product commercial still.",
+  "",
+  "CRITICAL: there must be ABSOLUTELY NO text, lettering, numbers, logos-as-text",
+  "or captions anywhere in the output image.",
+].join("\n");
+
+/**
+ * Video pre-pass: turn an uploaded image (often a finished infographic with
+ * baked-in text) into a clean product-only hero shot suitable for Veo
+ * image-to-video. Preserves the product, strips all text/graphics/background.
+ */
+export async function isolateProductForVideo(
+  imageBase64: string,
+  mimeType: string,
+): Promise<EditResult> {
+  return editImage([
+    {
+      role: "user",
+      imageBase64,
+      imageMimeType: mimeType,
+      text: VIDEO_PRODUCT_CLEANUP_PROMPT,
+    },
+  ]);
+}
+
 const LANGUAGE_RULE: Record<InfographicLanguage, string> = {
   en: [
     "EVERY word of LAYOUT TEXT you add to the design — headlines, sub-",

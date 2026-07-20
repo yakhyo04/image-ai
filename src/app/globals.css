@@ -1,26 +1,271 @@
 @import "tailwindcss";
 
+/* Class-based dark mode: toggled by `.dark` on <html> */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Artboard design tokens — ported from the Claude design source.
+ * Accent swapped from the design default (lime) to VIOLET per request.
+ * Light is the default (:root); dark is applied via the `.dark` class.
+ */
+
+/* ---- LIGHT (default) — warm paper ---- */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: oklch(0.985 0.004 100);
+  --bg-1: oklch(0.965 0.005 100);
+  --bg-2: oklch(0.93 0.006 100);
+  --bg-3: oklch(0.90 0.007 100);
+  --bg-glass: oklch(0.99 0.004 100 / 0.72);
+  --page: oklch(0.95 0.005 100);
+
+  --border: oklch(0.2 0.01 264 / 0.10);
+  --border-mid: oklch(0.2 0.01 264 / 0.16);
+  --border-strong: oklch(0.2 0.01 264 / 0.26);
+
+  --t-1: oklch(0.20 0.01 264);
+  --t-2: oklch(0.36 0.012 264);
+  --t-3: oklch(0.50 0.012 264);
+  --t-4: oklch(0.62 0.010 264);
+
+  /* accent — violet */
+  --acc: oklch(0.55 0.22 300);
+  --acc-2: oklch(0.49 0.21 300);
+  --acc-ink: oklch(1 0 0);
+  --acc-soft: oklch(0.55 0.22 300 / 0.12);
+  --acc-line: oklch(0.55 0.22 300 / 0.30);
+
+  --v-blue: oklch(0.55 0.18 250);
+  --v-violet: oklch(0.55 0.2 300);
+  --v-amber: oklch(0.70 0.16 70);
+  --v-cyan: oklch(0.65 0.13 200);
+
+  --ok: oklch(0.65 0.16 150);
+  --err: oklch(0.62 0.21 22);
+  --warn: oklch(0.75 0.15 80);
+
+  --sh-1: 0 1px 2px oklch(0.2 0.02 264 / 0.08);
+  --sh-2: 0 24px 60px -24px oklch(0.2 0.02 264 / 0.22);
+  --sh-pop: 0 40px 90px -32px oklch(0.2 0.02 264 / 0.28);
+
+  --r-xs: 8px;
+  --r-sm: 12px;
+  --r-md: 18px;
+  --r-lg: 24px;
+  --r-xl: 32px;
+
+  --font: var(--font-space-grotesk), "Inter Tight", -apple-system, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+  --grad: linear-gradient(120deg, oklch(0.6 0.23 300), oklch(0.52 0.2 285));
+}
+
+/* ---- DARK — near-black cool charcoal ---- */
+.dark {
+  --bg: oklch(0.145 0.008 264);
+  --bg-1: oklch(0.185 0.009 264);
+  --bg-2: oklch(0.225 0.010 264);
+  --bg-3: oklch(0.275 0.011 264);
+  --bg-glass: oklch(0.20 0.010 264 / 0.72);
+  --page: oklch(0.105 0.006 264);
+
+  --border: oklch(1 0 0 / 0.07);
+  --border-mid: oklch(1 0 0 / 0.12);
+  --border-strong: oklch(1 0 0 / 0.20);
+
+  --t-1: oklch(0.985 0 0);
+  --t-2: oklch(0.78 0.008 264);
+  --t-3: oklch(0.60 0.012 264);
+  --t-4: oklch(0.44 0.012 264);
+
+  /* accent — violet */
+  --acc: oklch(0.62 0.22 300);
+  --acc-2: oklch(0.70 0.20 300);
+  --acc-ink: oklch(1 0 0);
+  --acc-soft: oklch(0.62 0.22 300 / 0.15);
+  --acc-line: oklch(0.62 0.22 300 / 0.32);
+
+  --v-blue: oklch(0.62 0.16 250);
+  --v-violet: oklch(0.62 0.18 300);
+  --v-amber: oklch(0.78 0.16 70);
+  --v-cyan: oklch(0.72 0.13 200);
+
+  --ok: oklch(0.80 0.16 150);
+  --err: oklch(0.70 0.21 22);
+  --warn: oklch(0.82 0.15 80);
+
+  --sh-1: 0 1px 0 oklch(1 0 0 / 0.04) inset, 0 1px 2px oklch(0 0 0 / 0.3);
+  --sh-2: 0 24px 60px -20px oklch(0 0 0 / 0.6), 0 2px 8px oklch(0 0 0 / 0.35);
+  --sh-pop: 0 40px 90px -30px oklch(0 0 0 / 0.7);
+
+  --grad: linear-gradient(120deg, oklch(0.66 0.24 300), oklch(0.6 0.22 285));
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font);
+  --font-mono: var(--font-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+* { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+
+html { scroll-behavior: smooth; }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  background: var(--bg);
+  color: var(--t-1);
+  font-family: var(--font);
+  letter-spacing: -0.01em;
 }
+
+::selection { background: var(--acc-line); color: var(--t-1); }
+
+/* ── Buttons ───────────────────────────────────────────────── */
+.ab-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  font-family: var(--font); font-weight: 600; font-size: 15px; letter-spacing: -0.01em;
+  border: none; cursor: pointer; padding: 12px 20px; border-radius: 12px;
+  transition: transform .12s ease, background .15s ease, opacity .15s ease, border-color .15s ease;
+  user-select: none; white-space: nowrap; text-decoration: none;
+}
+.ab-btn:active { transform: scale(0.98); }
+.ab-btn-primary { background: var(--acc); color: var(--acc-ink); box-shadow: 0 1px 0 oklch(1 0 0 / 0.3) inset, 0 10px 28px -10px var(--acc-line); }
+.ab-btn-primary:hover { background: var(--acc-2); }
+.ab-btn-grad { background: var(--grad); color: var(--acc-ink); box-shadow: 0 10px 30px -10px var(--acc-line); }
+.ab-btn-ghost { background: var(--bg-2); color: var(--t-1); border: 1px solid var(--border-mid); }
+.ab-btn-ghost:hover { border-color: var(--border-strong); background: var(--bg-3); }
+.ab-btn-outline { background: transparent; color: var(--t-1); border: 1px solid var(--border-mid); }
+.ab-btn-outline:hover { border-color: var(--border-strong); }
+.ab-btn-text { background: transparent; color: var(--t-2); padding: 10px 10px; }
+.ab-btn-text:hover { color: var(--t-1); }
+.ab-btn-full { width: 100%; }
+.ab-btn-lg { padding: 15px 26px; font-size: 16px; border-radius: 14px; }
+.ab-btn-sm { padding: 8px 14px; font-size: 13px; border-radius: 10px; }
+
+/* ── Cards ─────────────────────────────────────────────────── */
+.ab-card { background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--r-md); }
+.ab-card-glass { background: var(--bg-glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--border-mid); border-radius: var(--r-md); }
+
+/* ── Type helpers ──────────────────────────────────────────── */
+.ab-display { font-size: 72px; font-weight: 600; letter-spacing: -0.045em; line-height: 0.98; }
+.ab-h1 { font-size: 44px; font-weight: 600; letter-spacing: -0.04em; line-height: 1.04; }
+.ab-h2 { font-size: 34px; font-weight: 600; letter-spacing: -0.035em; line-height: 1.08; }
+.ab-h3 { font-size: 22px; font-weight: 600; letter-spacing: -0.025em; line-height: 1.15; }
+.ab-h4 { font-size: 17px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.2; }
+.ab-body { font-size: 15px; line-height: 1.55; color: var(--t-2); letter-spacing: -0.003em; }
+.ab-eyebrow { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--t-3); font-weight: 500; }
+.ab-mono { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0; }
+
+/* ── Chips / pills ─────────────────────────────────────────── */
+.ab-chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--bg-2); border: 1px solid var(--border); border-radius: 100px; font-size: 12px; font-weight: 500; color: var(--t-2); letter-spacing: -0.005em; white-space: nowrap; }
+.ab-chip-acc { background: var(--acc-soft); border-color: var(--acc-line); color: var(--acc); }
+
+/* ── Glow ──────────────────────────────────────────────────── */
+.ab-glow { position: absolute; pointer-events: none; border-radius: 50%; filter: blur(70px); opacity: 0.5; }
+
+/* ── Nav link ──────────────────────────────────────────────── */
+.ab-nav-link { font-size: 14px; font-weight: 500; color: var(--t-2); cursor: pointer; transition: color .15s ease; letter-spacing: -0.01em; background: none; border: none; font-family: var(--font); text-decoration: none; }
+.ab-nav-link:hover { color: var(--t-1); }
+
+/* ── Nav layout ────────────────────────────────────────────── */
+.ab-nav-inner { max-width: 1440px; margin: 0 auto; height: 70px; display: flex; align-items: center; gap: 18px; padding: 0 40px; }
+.ab-nav-links { display: flex; gap: 26px; margin-left: 30px; }
+.ab-nav-actions { display: flex; align-items: center; gap: 14px; }
+.ab-nav-mobile { display: none; align-items: center; gap: 8px; }
+@media (max-width: 900px) {
+  .ab-nav-links, .ab-nav-actions { display: none; }
+  .ab-nav-mobile { display: flex; }
+  .ab-nav-inner { padding: 0 20px; }
+}
+
+/* ── Hero ──────────────────────────────────────────────────── */
+.ab-hero-title { font-size: 60px; }
+@media (max-width: 900px) {
+  .ab-hero-grid { grid-template-columns: 1fr !important; gap: 48px !important; }
+  .ab-hero-title { font-size: 44px; }
+  .ab-display { font-size: 52px; }
+  .ab-h1 { font-size: 34px; }
+  .ab-h2 { font-size: 28px; }
+}
+
+/* ── Section layout ────────────────────────────────────────── */
+.ab-section { position: relative; }
+.ab-section-inner { max-width: 1440px; margin: 0 auto; padding: var(--ab-pad, 96px 100px); position: relative; }
+@media (max-width: 900px) {
+  .ab-section-inner { padding: 64px 24px; }
+}
+
+/* ── Responsive grids ──────────────────────────────────────── */
+@media (max-width: 900px) {
+  .ab-grid-3 { grid-template-columns: 1fr !important; }
+  .ab-grid-2 { grid-template-columns: 1fr !important; }
+  .ab-how-line { display: none; }
+  .ab-logos-row { flex-wrap: wrap; justify-content: center !important; gap: 24px !important; }
+  .ab-gallery-head { flex-direction: column; align-items: flex-start !important; gap: 24px; }
+  .ab-gallery-cols { column-count: 2 !important; }
+  .ab-demo-grid { grid-template-columns: 1fr !important; }
+  .ab-faq-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
+  .ab-footer-grid { grid-template-columns: 1fr 1fr !important; }
+  .ab-cta-title { font-size: 32px !important; }
+  .ab-grid-4 { grid-template-columns: 1fr 1fr !important; }
+  .ab-detail-hero { grid-template-columns: 1fr !important; gap: 40px !important; }
+  .ab-detail-use { grid-template-columns: 1fr !important; gap: 40px !important; }
+  .ab-detail-showcase { height: auto !important; grid-template-columns: 1fr 1fr !important; grid-template-rows: auto !important; }
+  .ab-detail-showcase > * { min-height: 180px; grid-row: auto !important; }
+}
+
+/* ── Scroll area ───────────────────────────────────────────── */
+.ab-scroll { overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--bg-3) transparent; }
+.ab-scroll::-webkit-scrollbar { width: 10px; height: 10px; }
+.ab-scroll::-webkit-scrollbar-thumb { background: var(--bg-3); border-radius: 10px; border: 3px solid var(--bg); }
+
+/* ── Dashboard responsive ──────────────────────────────────── */
+@media (max-width: 1100px) {
+  .ab-dash-cols { display: block !important; height: auto !important; }
+  .ab-dash-cols > div { min-width: 0; }
+  .ab-dash-progress { grid-template-columns: 1fr !important; }
+  .ab-dash-stats { grid-template-columns: 1fr 1fr !important; }
+  .ab-dash-masonry { column-count: 3 !important; }
+  .ab-dash-grid { grid-template-columns: repeat(3, 1fr) !important; }
+  .ab-dash-tools { grid-template-columns: repeat(3, 1fr) !important; }
+  .ab-dash-home-grid { grid-template-columns: 1fr !important; }
+  .ab-dash-detail { grid-template-columns: 1fr !important; }
+  .ab-dash-settings { grid-template-columns: 1fr !important; }
+  .ab-settings-nav { display: flex; flex-wrap: wrap; gap: 6px; border-right: none !important; border-bottom: 1px solid var(--border); }
+}
+@media (max-width: 680px) {
+  .ab-dash-masonry { column-count: 2 !important; }
+  .ab-dash-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .ab-dash-tools { grid-template-columns: repeat(2, 1fr) !important; }
+}
+
+/* Auth — collapse the brand panel on narrow screens */
+@media (max-width: 900px) {
+  .ab-auth { grid-template-columns: 1fr !important; }
+  .ab-auth-brand { display: none !important; }
+}
+
+/* ── Dashboard mobile shell ────────────────────────────────── */
+.ab-mobile-tabbar { display: none; }
+@media (max-width: 720px) {
+  .ab-dash-sidebar { display: none !important; }
+  .ab-dash-menu { display: none !important; }
+  .ab-mobile-tabbar { display: block; }
+  .ab-dash-bell { display: none !important; }
+  .ab-dash-avatar { display: none !important; }
+  .ab-dash-topbar { gap: 10px !important; padding: 0 16px !important; }
+  .ab-dash-title { max-width: 52vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
+/* When the 3-column workspaces stack, keep the canvas a sane height (not a full viewport) and unpin it */
+@media (max-width: 1100px) {
+  .ab-canvas-col { position: static !important; height: auto !important; max-height: none !important; align-self: stretch !important; }
+  .ab-canvas-col > div:last-child { min-height: 46vh !important; }
+  .ab-dash-cols > div { border-left: none !important; border-right: none !important; }
+  .ab-dash-cols > div + div { border-top: 1px solid var(--border); }
+}
+
+/* ── Dividers ──────────────────────────────────────────────── */
+.ab-rule { height: 1px; width: 100%; background: var(--border); }
+
+/* ── Animations ────────────────────────────────────────────── */
+@keyframes ab-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+@keyframes ab-spin { to { transform: rotate(360deg); } }
+@keyframes ab-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
