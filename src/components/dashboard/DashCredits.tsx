@@ -8,6 +8,8 @@ import { GENERATION_COST } from "@/lib/credits";
 import { PLANS, PACKS } from "@/lib/billing";
 import { createClient } from "@/lib/supabase/client";
 import { useCredits } from "@/store/credits";
+import { useDict } from "@/i18n/context";
+import type { Dict } from "@/i18n";
 
 type Txn = {
   amount: number;
@@ -22,13 +24,13 @@ function fmtDate(iso: string | null): string {
   return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
-function txnLabel(t: Txn): string {
-  if (t.description) return t.description;
-  if (t.kind === "spend") return "Generation";
-  if (t.kind === "refund") return "Refund";
-  if (t.source === "subscription") return "Subscription credits";
-  if (t.source === "signup") return "Welcome credits";
-  return "Credit purchase";
+function txnLabel(tx: Txn, c: Dict["dash"]["credits"]): string {
+  if (tx.description) return tx.description;
+  if (tx.kind === "spend") return c.txn.generation;
+  if (tx.kind === "refund") return c.txn.refund;
+  if (tx.source === "subscription") return c.txn.subscription;
+  if (tx.source === "signup") return c.txn.welcome;
+  return c.txn.purchase;
 }
 
 export default function DashCredits({
@@ -50,6 +52,8 @@ export default function DashCredits({
   const status = params.get("status");
   const router = useRouter();
   const setStoreCredits = useCredits((s) => s.setCredits);
+  const t = useDict();
+  const c = t.dash.credits;
 
   // After returning from a successful checkout, the credits are granted by the
   // Polar webhook a moment later. Poll the balance until it changes, then
@@ -121,13 +125,13 @@ export default function DashCredits({
         {status === "success" && (
           <div className="ab-card" style={{ padding: "14px 18px", marginBottom: 20, display: "flex", alignItems: "center", gap: 12, border: "1.5px solid var(--ok)", background: "color-mix(in srgb, var(--ok) 8%, var(--bg-1))" }}>
             <Icon name="check" size={18} stroke={2.6} style={{ color: "var(--ok)" }} />
-            <span style={{ fontSize: 13.5, fontWeight: 600 }}>Payment received — your credits will appear here within a few seconds.</span>
+            <span style={{ fontSize: 13.5, fontWeight: 600 }}>{c.paymentReceived}</span>
           </div>
         )}
         {status === "error" && (
           <div className="ab-card" style={{ padding: "14px 18px", marginBottom: 20, display: "flex", alignItems: "center", gap: 12, border: "1.5px solid var(--err, #e5484d)" }}>
             <Icon name="close" size={18} stroke={2.6} style={{ color: "var(--err, #e5484d)" }} />
-            <span style={{ fontSize: 13.5, fontWeight: 600 }}>Checkout couldn’t start. Please try again.</span>
+            <span style={{ fontSize: 13.5, fontWeight: 600 }}>{c.checkoutFailed}</span>
           </div>
         )}
 
@@ -136,22 +140,22 @@ export default function DashCredits({
           <div className="ab-card" style={{ padding: 26, position: "relative", overflow: "hidden" }}>
             <div className="ab-glow" style={{ width: 180, height: 180, background: "var(--acc)", bottom: -80, right: -40, opacity: 0.14 }} />
             <div style={{ position: "relative" }}>
-              <div className="ab-eyebrow">Current balance</div>
+              <div className="ab-eyebrow">{c.balanceCurrent}</div>
               <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginTop: 10 }}>
                 <span style={{ fontSize: 64, fontWeight: 600, letterSpacing: "-0.05em", lineHeight: 1 }}>{credits}</span>
-                <span className="ab-body" style={{ fontSize: 15 }}>credits</span>
+                <span className="ab-body" style={{ fontSize: 15 }}>{c.creditsWord}</span>
               </div>
-              <div className="ab-body" style={{ fontSize: 13, marginTop: 8 }}>≈ {Math.floor(credits / GENERATION_COST)} generations · {GENERATION_COST} credits each</div>
-              <a href="#packs" className="ab-btn ab-btn-primary" style={{ marginTop: 18, textDecoration: "none" }}><Icon name="plus" size={16} stroke={2.4} /> Buy more credits</a>
+              <div className="ab-body" style={{ fontSize: 13, marginTop: 8 }}>{c.approxGen.replace("{n}", String(Math.floor(credits / GENERATION_COST))).replace("{c}", String(GENERATION_COST))}</div>
+              <a href="#packs" className="ab-btn ab-btn-primary" style={{ marginTop: 18, textDecoration: "none" }}><Icon name="plus" size={16} stroke={2.4} /> {c.buyMore}</a>
             </div>
           </div>
           <div className="ab-card" style={{ padding: 26 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
-              <div className="ab-eyebrow">Usage this month</div>
+              <div className="ab-eyebrow">{c.usageThisMonth}</div>
               <span className="ab-chip ab-chip-acc"><Icon name="crown" size={12} /> {PLANS[currentPlanIdx].name}</span>
             </div>
             <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 10 }}>
-              <span style={{ fontSize: 15, fontWeight: 600 }}>{usedThisMonth} credits used · {gensThisMonth} {gensThisMonth === 1 ? "generation" : "generations"}</span>
+              <span style={{ fontSize: 15, fontWeight: 600 }}>{c.usedLine.replace("{used}", String(usedThisMonth)).replace("{g}", String(gensThisMonth)).replace("{word}", gensThisMonth === 1 ? c.generation : c.generations)}</span>
               <span className="ab-mono" style={{ color: "var(--acc)", fontWeight: 700 }}>{pct}%</span>
             </div>
             <div style={{ height: 10, borderRadius: 100, background: "var(--bg-3)", overflow: "hidden" }}>
@@ -160,27 +164,27 @@ export default function DashCredits({
             <div className="ab-body" style={{ fontSize: 12.5, marginTop: 18 }}>
               {hasSubscription ? (
                 <>
-                  {PLANS[currentPlanIdx].name} plan · {allowance} credits each cycle
+                  {c.planCycle.replace("{name}", PLANS[currentPlanIdx].name).replace("{n}", String(allowance))}
                   {subscriptionStatus === "canceled" && periodEnd
-                    ? ` · ends ${fmtDate(periodEnd)}`
+                    ? ` · ${c.endsOn.replace("{date}", fmtDate(periodEnd))}`
                     : periodEnd
-                    ? ` · renews ${fmtDate(periodEnd)}`
+                    ? ` · ${c.renewsOn.replace("{date}", fmtDate(periodEnd))}`
                     : ""}
                 </>
               ) : (
-                <>Starter plan · {allowance} free credits to start</>
+                <>{c.starterLine.replace("{n}", String(allowance))}</>
               )}
             </div>
             {hasSubscription && (
               <a href="/portal" className="ab-btn ab-btn-ghost ab-btn-sm" style={{ marginTop: 14, textDecoration: "none" }}>
-                <Icon name="settings" size={14} /> Manage subscription
+                <Icon name="settings" size={14} /> {c.manageSubscription}
               </a>
             )}
           </div>
         </div>
 
         {/* plans */}
-        <div className="ab-h4" style={{ fontSize: 17, marginBottom: 16 }}>Your plan</div>
+        <div className="ab-h4" style={{ fontSize: 17, marginBottom: 16 }}>{c.yourPlan}</div>
         <div className="ab-grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginBottom: 30 }}>
           {PLANS.map((p, i) => {
             const on = selectedPlan === i;
@@ -199,23 +203,23 @@ export default function DashCredits({
                   boxShadow: on ? "0 24px 60px -34px var(--acc-line)" : "none",
                 }}
               >
-                {current && <div style={{ position: "absolute", top: -11, left: 22, background: "var(--acc)", color: "var(--acc-ink)", fontSize: 9, fontWeight: 700, padding: "4px 11px", borderRadius: 100, fontFamily: "var(--font-mono)", letterSpacing: "0.06em" }}>CURRENT PLAN</div>}
+                {current && <div style={{ position: "absolute", top: -11, left: 22, background: "var(--acc)", color: "var(--acc-ink)", fontSize: 9, fontWeight: 700, padding: "4px 11px", borderRadius: 100, fontFamily: "var(--font-mono)", letterSpacing: "0.06em" }}>{c.currentPlanBadge}</div>}
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                   <div className="ab-h4" style={{ fontSize: 17 }}>{p.name}</div>
                   {on && <span style={{ width: 20, height: 20, borderRadius: "50%", background: "var(--acc)", color: "var(--acc-ink)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><Icon name="check" size={12} stroke={3} /></span>}
                 </div>
-                <div className="ab-body" style={{ fontSize: 12.5, marginTop: 2 }}>{p.blurb}</div>
+                <div className="ab-body" style={{ fontSize: 12.5, marginTop: 2 }}>{c.planBlurbs[p.key]}</div>
                 <div style={{ display: "flex", alignItems: "baseline", gap: 3, marginTop: 14 }}>
                   <span style={{ fontSize: 15, fontWeight: 500, color: "var(--t-3)" }}>$</span>
                   <span style={{ fontSize: 34, fontWeight: 600, letterSpacing: "-0.04em" }}>{p.price}</span>
-                  <span className="ab-body" style={{ fontSize: 13 }}>/mo</span>
+                  <span className="ab-body" style={{ fontSize: 13 }}>{c.perMonth}</span>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 7, marginTop: 12, padding: "8px 12px", background: "var(--bg-2)", borderRadius: 11 }}>
                   <Icon name="bolt" size={15} style={{ color: "var(--acc)" }} />
-                  <span style={{ fontSize: 12.5, fontWeight: 600 }}>{p.credits.toLocaleString()} credits / mo</span>
+                  <span style={{ fontSize: 12.5, fontWeight: 600 }}>{c.creditsPerMonth.replace("{n}", p.credits.toLocaleString())}</span>
                 </div>
                 {current ? (
-                  <button disabled className="ab-btn ab-btn-ghost ab-btn-full ab-btn-sm" style={{ marginTop: 14, opacity: 0.7 }}>Current plan</button>
+                  <button disabled className="ab-btn ab-btn-ghost ab-btn-full ab-btn-sm" style={{ marginTop: 14, opacity: 0.7 }}>{c.currentPlanBtn}</button>
                 ) : p.productId ? (
                   <a
                     href={`/checkout?plan=${p.key}`}
@@ -223,7 +227,7 @@ export default function DashCredits({
                     className="ab-btn ab-btn-primary ab-btn-full ab-btn-sm"
                     style={{ marginTop: 14, textDecoration: "none" }}
                   >
-                    Switch to {p.name}
+                    {c.switchTo.replace("{name}", p.name)}
                   </a>
                 ) : (
                   // Downgrade to the free plan = cancel the subscription via portal.
@@ -233,7 +237,7 @@ export default function DashCredits({
                     className="ab-btn ab-btn-ghost ab-btn-full ab-btn-sm"
                     style={{ marginTop: 14, textDecoration: "none" }}
                   >
-                    Downgrade
+                    {c.downgrade}
                   </a>
                 )}
               </div>
@@ -242,7 +246,7 @@ export default function DashCredits({
         </div>
 
         {/* credit packs */}
-        <div id="packs" className="ab-h4" style={{ fontSize: 17, marginBottom: 16, scrollMarginTop: 90 }}>Buy credit packs</div>
+        <div id="packs" className="ab-h4" style={{ fontSize: 17, marginBottom: 16, scrollMarginTop: 90 }}>{c.buyPacks}</div>
         <div className="ab-grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginBottom: 30 }}>
           {PACKS.map((p) => (
             <div
@@ -254,17 +258,17 @@ export default function DashCredits({
                 boxShadow: p.best ? "0 24px 60px -34px var(--acc-line)" : "none",
               }}
             >
-              {p.best && <div style={{ position: "absolute", top: -11, left: 22, background: "var(--acc)", color: "var(--acc-ink)", fontSize: 9, fontWeight: 700, padding: "4px 11px", borderRadius: 100, fontFamily: "var(--font-mono)", letterSpacing: "0.06em" }}>BEST VALUE</div>}
+              {p.best && <div style={{ position: "absolute", top: -11, left: 22, background: "var(--acc)", color: "var(--acc-ink)", fontSize: 9, fontWeight: 700, padding: "4px 11px", borderRadius: 100, fontFamily: "var(--font-mono)", letterSpacing: "0.06em" }}>{c.bestValue}</div>}
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <Icon name="bolt" size={20} style={{ color: "var(--acc)" }} />
                   <span style={{ fontSize: 26, fontWeight: 600, letterSpacing: "-0.04em" }}>{p.credits.toLocaleString()}</span>
                 </div>
-                <span className="ab-mono" style={{ color: "var(--t-3)", fontSize: 11 }}>{p.blurb}</span>
+                <span className="ab-mono" style={{ color: "var(--t-3)", fontSize: 11 }}>{c.packBlurbs[p.key]}</span>
               </div>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 18 }}>
                 <span style={{ fontSize: 22, fontWeight: 600 }}>${p.price}</span>
-                <a href={`/checkout?pack=${p.key}`} className={p.best ? "ab-btn ab-btn-primary ab-btn-sm" : "ab-btn ab-btn-ghost ab-btn-sm"} style={{ textDecoration: "none" }}>Buy</a>
+                <a href={`/checkout?pack=${p.key}`} className={p.best ? "ab-btn ab-btn-primary ab-btn-sm" : "ab-btn ab-btn-ghost ab-btn-sm"} style={{ textDecoration: "none" }}>{c.buy}</a>
               </div>
             </div>
           ))}
@@ -272,12 +276,12 @@ export default function DashCredits({
 
         {/* transaction history */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-          <div className="ab-h4" style={{ fontSize: 17 }}>Transaction history</div>
-          <div className="ab-body" style={{ fontSize: 12, display: "flex", alignItems: "center", gap: 7 }}><Icon name="shield" size={14} style={{ color: "var(--acc)" }} /> Secured by Polar</div>
+          <div className="ab-h4" style={{ fontSize: 17 }}>{c.txnHistory}</div>
+          <div className="ab-body" style={{ fontSize: 12, display: "flex", alignItems: "center", gap: 7 }}><Icon name="shield" size={14} style={{ color: "var(--acc)" }} /> {c.securedByPolar}</div>
         </div>
         <div className="ab-card" style={{ overflow: "hidden" }}>
           {txns.length === 0 ? (
-            <div style={{ padding: "28px 18px", textAlign: "center" }} className="ab-body">No transactions yet.</div>
+            <div style={{ padding: "28px 18px", textAlign: "center" }} className="ab-body">{c.noTxns}</div>
           ) : (
             txns.map((tx, i) => {
               const credit = tx.amount >= 0;
@@ -285,11 +289,11 @@ export default function DashCredits({
                 <div key={i} style={{ display: "flex", alignItems: "center", gap: 14, padding: "15px 18px", borderBottom: i < txns.length - 1 ? "1px solid var(--border)" : "none" }}>
                   <div style={{ width: 36, height: 36, borderRadius: 11, background: credit ? "var(--acc-soft)" : "var(--bg-2)", color: credit ? "var(--acc)" : "var(--t-2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><Icon name={credit ? "plus" : "sparkle-fill"} size={16} /></div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 13.5, fontWeight: 600, letterSpacing: "-0.01em" }}>{txnLabel(tx)}</div>
-                    <div className="ab-body" style={{ fontSize: 11.5, marginTop: 1, textTransform: "capitalize" }}>{tx.kind} · {fmtDate(tx.createdAt)}</div>
+                    <div style={{ fontSize: 13.5, fontWeight: 600, letterSpacing: "-0.01em" }}>{txnLabel(tx, c)}</div>
+                    <div className="ab-body" style={{ fontSize: 11.5, marginTop: 1, textTransform: "capitalize" }}>{c.kind[tx.kind as keyof typeof c.kind] ?? tx.kind} · {fmtDate(tx.createdAt)}</div>
                   </div>
                   <div style={{ textAlign: "right" }}>
-                    <div className="ab-mono" style={{ fontSize: 14, fontWeight: 700, color: credit ? "var(--ok)" : "var(--t-1)" }}>{credit ? "+" : "−"}{Math.abs(tx.amount)} <span style={{ fontSize: 10, color: "var(--t-3)" }}>cr</span></div>
+                    <div className="ab-mono" style={{ fontSize: 14, fontWeight: 700, color: credit ? "var(--ok)" : "var(--t-1)" }}>{credit ? "+" : "−"}{Math.abs(tx.amount)} <span style={{ fontSize: 10, color: "var(--t-3)" }}>{c.crShort}</span></div>
                   </div>
                 </div>
               );

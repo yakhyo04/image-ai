@@ -10,16 +10,8 @@ import { triggerDownload } from "@/lib/imageExport";
 import { resizeVideo, VIDEO_SIZES } from "@/lib/videoExport";
 import type { GenerationDetail } from "@/lib/generations";
 import { thumbSrc } from "@/lib/img";
-
-const TOOL_LABELS: Record<string, string> = {
-  infographics: "Infographic",
-  editor: "Edit",
-  interior: "Interior",
-  mockups: "Mockup",
-  backgrounds: "Background",
-  patterns: "Pattern",
-  video: "Video",
-};
+import { useDict } from "@/i18n/context";
+import type { Dict } from "@/i18n";
 
 const EXT: Record<string, string> = {
   "image/png": "png",
@@ -42,8 +34,11 @@ export default function GalleryDetail({ item }: { item: GenerationDetail }) {
   const router = useRouter();
   const [busy, setBusy] = useState<"download" | "delete" | null>(null);
   const [sizeLabel, setSizeLabel] = useState(VIDEO_SIZES[1].label); // default 1080×1920
+  const t = useDict();
+  const g = t.dash.gallery;
 
-  const label = TOOL_LABELS[item.tool ?? ""] ?? "Image";
+  const label = t.dash.toolLabels[(item.tool ?? "") as keyof Dict["dash"]["toolLabels"]] ?? g.imageFallback;
+  const slug = item.tool ?? "image"; // language-independent filename slug
   const isVideo = (item.mimeType ?? "").startsWith("video");
 
   async function download() {
@@ -57,7 +52,7 @@ export default function GalleryDetail({ item }: { item: GenerationDetail }) {
         const res = await fetch(item.url);
         const blob = await res.blob();
         const ext = EXT[item.mimeType ?? ""] ?? "png";
-        triggerDownload(blob, `artboard-${label.toLowerCase()}-${item.id.slice(0, 8)}.${ext}`);
+        triggerDownload(blob, `artboard-${slug}-${item.id.slice(0, 8)}.${ext}`);
       }
     } catch {
       // Fall back to opening the file in a new tab if export/blob fetch fails.
@@ -68,12 +63,12 @@ export default function GalleryDetail({ item }: { item: GenerationDetail }) {
   }
 
   async function remove() {
-    if (!confirm("Delete this generation? This can't be undone.")) return;
+    if (!confirm(g.confirmDelete)) return;
     setBusy("delete");
     const supabase = createClient();
     const { error } = await supabase.from("generations").delete().eq("id", item.id);
     if (error) {
-      alert("Couldn't delete — please try again.");
+      alert(g.deleteFailed);
       setBusy(null);
       return;
     }
@@ -88,7 +83,7 @@ export default function GalleryDetail({ item }: { item: GenerationDetail }) {
           href="/dashboard/gallery"
           style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--t-3)", textDecoration: "none", marginBottom: 18 }}
         >
-          <Icon name="chevron-right" size={16} style={{ transform: "rotate(180deg)" }} /> Back to gallery
+          <Icon name="chevron-right" size={16} style={{ transform: "rotate(180deg)" }} /> {g.backToGallery}
         </Link>
 
         <div className="ab-dash-detail" style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr", gap: 24, alignItems: "start" }}>
@@ -120,12 +115,12 @@ export default function GalleryDetail({ item }: { item: GenerationDetail }) {
             <span className="ab-chip ab-chip-acc" style={{ marginBottom: 14 }}>
               <Icon name="sparkle-fill" size={12} /> {label}
             </span>
-            <div className="ab-h4" style={{ fontSize: 18, marginBottom: 4 }}>{label} generation</div>
+            <div className="ab-h4" style={{ fontSize: 18, marginBottom: 4 }}>{g.genLabel.replace("{label}", label)}</div>
             <div className="ab-body" style={{ fontSize: 12.5 }}>{fmtDate(item.createdAt)}</div>
 
             {item.prompt && (
               <>
-                <div className="ab-eyebrow" style={{ fontSize: 10, marginTop: 22, marginBottom: 8 }}>Prompt</div>
+                <div className="ab-eyebrow" style={{ fontSize: 10, marginTop: 22, marginBottom: 8 }}>{g.prompt}</div>
                 <div className="ab-body" style={{ fontSize: 13, lineHeight: 1.55, whiteSpace: "pre-wrap", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 11, padding: "12px 14px" }}>{item.prompt}</div>
               </>
             )}
@@ -136,7 +131,7 @@ export default function GalleryDetail({ item }: { item: GenerationDetail }) {
                   value={sizeLabel}
                   onChange={(e) => setSizeLabel(e.target.value)}
                   disabled={busy !== null}
-                  aria-label="Download size"
+                  aria-label={g.downloadSize}
                   style={{ height: 44, borderRadius: 11, background: "var(--bg)", border: "1px solid var(--border-mid)", color: "var(--t-1)", padding: "0 12px", fontSize: 14, fontFamily: "var(--font)", cursor: busy ? "default" : "pointer" }}
                 >
                   {VIDEO_SIZES.map((s) => (
@@ -145,10 +140,10 @@ export default function GalleryDetail({ item }: { item: GenerationDetail }) {
                 </select>
               )}
               <button onClick={download} disabled={busy !== null} className="ab-btn ab-btn-primary ab-btn-full" style={{ opacity: busy ? 0.7 : 1 }}>
-                <Icon name="download" size={16} stroke={2.2} /> {busy === "download" ? (isVideo ? "Exporting…" : "Preparing…") : "Download"}
+                <Icon name="download" size={16} stroke={2.2} /> {busy === "download" ? (isVideo ? g.exporting : g.preparing) : g.download}
               </button>
               <button onClick={remove} disabled={busy !== null} className="ab-btn ab-btn-ghost ab-btn-full" style={{ color: "var(--err)", opacity: busy ? 0.7 : 1 }}>
-                <Icon name="trash" size={16} /> {busy === "delete" ? "Deleting…" : "Delete"}
+                <Icon name="trash" size={16} /> {busy === "delete" ? g.deleting : g.delete}
               </button>
             </div>
           </div>

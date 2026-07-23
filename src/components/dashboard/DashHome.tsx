@@ -3,20 +3,18 @@ import { Icon } from "@/components/landing/ui";
 import DashFrame from "./DashFrame";
 import type { GalleryItem } from "@/lib/generations";
 import { thumbSrc } from "@/lib/img";
+import { getDict } from "@/i18n/server";
+import type { Dict } from "@/i18n";
 
 const TOOLS = [
-  { id: "infographics", icon: "sliders", title: "Infographics", tone: "oklch(0.34 0.07 200)", href: "/dashboard/infographics", hot: true },
-  { id: "editor", icon: "magic", title: "Photo Editor", tone: "oklch(0.32 0.08 25)", href: "/dashboard/editor" },
-  { id: "interior", icon: "sofa", title: "Interior Design", tone: "oklch(0.33 0.06 130)", href: "/dashboard/interior" },
-  { id: "mockups", icon: "box", title: "Mockups", tone: "oklch(0.32 0.07 300)", href: "/dashboard/mockups" },
-  { id: "backgrounds", icon: "scissors", title: "Backgrounds", tone: "oklch(0.34 0.06 250)", href: "/dashboard/backgrounds" },
-  { id: "patterns", icon: "palette", title: "Patterns", tone: "oklch(0.34 0.08 70)", href: "/dashboard/patterns", neu: true },
+  { id: "infographics", icon: "sliders", tone: "oklch(0.34 0.07 200)", href: "/dashboard/infographics", hot: true },
+  { id: "editor", icon: "magic", tone: "oklch(0.32 0.08 25)", href: "/dashboard/editor" },
+  { id: "interior", icon: "sofa", tone: "oklch(0.33 0.06 130)", href: "/dashboard/interior" },
+  { id: "mockups", icon: "box", tone: "oklch(0.32 0.07 300)", href: "/dashboard/mockups" },
+  { id: "backgrounds", icon: "scissors", tone: "oklch(0.34 0.06 250)", href: "/dashboard/backgrounds" },
+  { id: "patterns", icon: "palette", tone: "oklch(0.34 0.08 70)", href: "/dashboard/patterns", neu: true },
 ] as const;
 
-const TOOL_LABEL: Record<string, string> = {
-  infographics: "Infographic", editor: "Photo edit", interior: "Interior",
-  mockups: "Mockup", backgrounds: "Background", patterns: "Pattern", video: "Video",
-};
 const TOOL_ICON: Record<string, string> = {
   infographics: "sliders", editor: "magic", interior: "sofa",
   mockups: "box", backgrounds: "scissors", patterns: "palette", video: "play",
@@ -35,7 +33,10 @@ function ago(iso: string): string {
   return `${Math.floor(hrs / 24)}d`;
 }
 
-export default function DashHome({ name, credits, items, successRate }: { name: string; credits: number; items: GalleryItem[]; successRate: number | null }) {
+export default async function DashHome({ name, credits, items, successRate }: { name: string; credits: number; items: GalleryItem[]; successRate: number | null }) {
+  const t = await getDict();
+  const h = t.dash.home;
+  const toolLabel = (k?: string | null) => t.dash.toolLabels[(k ?? "") as keyof Dict["dash"]["toolLabels"]] ?? "—";
   const firstName = name.trim().split(/\s+/)[0] || "there";
 
   const now = Date.now();
@@ -49,10 +50,10 @@ export default function DashHome({ name, credits, items, successRate }: { name: 
   const lowCredits = credits < 20;
 
   const STATS = [
-    { v: String(items.length), l: "Total generations", sub: "All time", acc: false },
-    { v: String(credits), l: "Credits left", sub: "10 per generation", acc: true },
-    { v: successRate === null ? "—" : `${successRate}%`, l: "Success rate", sub: successRate === null ? "No data yet" : "Successful runs", acc: false },
-    { v: String(weekItems.length), l: "This week", sub: "Last 7 days", acc: false },
+    { v: String(items.length), l: h.stats.totalGenerations, sub: h.stats.allTime, acc: false },
+    { v: String(credits), l: h.stats.creditsLeft, sub: h.stats.perGeneration, acc: true },
+    { v: successRate === null ? "—" : `${successRate}%`, l: h.stats.successRate, sub: successRate === null ? h.stats.noData : h.stats.successfulRuns, acc: false },
+    { v: String(weekItems.length), l: h.stats.thisWeek, sub: h.stats.last7, acc: false },
   ];
 
   // Per-day counts for the last 7 days (oldest → today).
@@ -76,10 +77,10 @@ export default function DashHome({ name, credits, items, successRate }: { name: 
         {/* greeting + CTA */}
         <div className="ab-dash-home-head" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, marginBottom: 26, position: "relative", flexWrap: "wrap" }}>
           <div>
-            <div className="ab-eyebrow" style={{ marginBottom: 8 }}>Your studio</div>
-            <div className="ab-h2" style={{ fontSize: 30 }}>Welcome back, {firstName}</div>
+            <div className="ab-eyebrow" style={{ marginBottom: 8 }}>{h.yourStudio}</div>
+            <div className="ab-h2" style={{ fontSize: 30 }}>{h.welcomeBack.replace("{name}", firstName)}</div>
           </div>
-          <Link href="/dashboard/infographics" className="ab-btn ab-btn-primary ab-btn-lg"><Icon name="plus" size={18} stroke={2.4} /> New generation</Link>
+          <Link href="/dashboard/infographics" className="ab-btn ab-btn-primary ab-btn-lg"><Icon name="plus" size={18} stroke={2.4} /> {t.dash.newGeneration}</Link>
         </div>
 
         {/* stat cards */}
@@ -95,8 +96,8 @@ export default function DashHome({ name, credits, items, successRate }: { name: 
 
         {/* quick tools */}
         <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 16 }}>
-          <div className="ab-h4" style={{ fontSize: 17 }}>Quick start</div>
-          <span className="ab-mono" style={{ color: "var(--t-3)", fontSize: 11 }}>06 TOOLS</span>
+          <div className="ab-h4" style={{ fontSize: 17 }}>{h.quickStart}</div>
+          <span className="ab-mono" style={{ color: "var(--t-3)", fontSize: 11 }}>{h.toolsCount}</span>
         </div>
         <div className="ab-dash-tools" style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 14, marginBottom: 30 }}>
           {TOOLS.map((tl) => (
@@ -104,9 +105,9 @@ export default function DashHome({ name, credits, items, successRate }: { name: 
               <div style={{ position: "absolute", inset: 0, background: "repeating-linear-gradient(135deg, oklch(1 0 0 / 0.05) 0 1px, transparent 1px 9px)" }} />
               <div style={{ position: "relative", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                 <div style={{ width: 38, height: 38, borderRadius: 11, background: "oklch(0 0 0 / 0.28)", display: "flex", alignItems: "center", justifyContent: "center", color: "oklch(1 0 0 / 0.95)" }}><Icon name={tl.icon} size={19} /></div>
-                {("hot" in tl || "neu" in tl) && <span style={{ fontFamily: "var(--font-mono)", fontSize: 8, fontWeight: 700, padding: "3px 6px", borderRadius: 6, background: "hot" in tl ? "var(--acc)" : "oklch(0 0 0 / 0.35)", color: "hot" in tl ? "var(--acc-ink)" : "oklch(1 0 0 / 0.9)", letterSpacing: "0.06em" }}>{"hot" in tl ? "HOT" : "NEW"}</span>}
+                {("hot" in tl || "neu" in tl) && <span style={{ fontFamily: "var(--font-mono)", fontSize: 8, fontWeight: 700, padding: "3px 6px", borderRadius: 6, background: "hot" in tl ? "var(--acc)" : "oklch(0 0 0 / 0.35)", color: "hot" in tl ? "var(--acc-ink)" : "oklch(1 0 0 / 0.9)", letterSpacing: "0.06em" }}>{"hot" in tl ? h.badgeHot : t.dash.badgeNew}</span>}
               </div>
-              <div style={{ position: "relative", fontSize: 14, fontWeight: 600, letterSpacing: "-0.02em", color: "oklch(1 0 0 / 0.95)" }}>{tl.title}</div>
+              <div style={{ position: "relative", fontSize: 14, fontWeight: 600, letterSpacing: "-0.02em", color: "oklch(1 0 0 / 0.95)" }}>{h.quickTools[tl.id]}</div>
             </Link>
           ))}
         </div>
@@ -115,13 +116,13 @@ export default function DashHome({ name, credits, items, successRate }: { name: 
         <div className="ab-dash-home-grid" style={{ display: "grid", gridTemplateColumns: "1.3fr 1fr", gap: 24 }}>
           <div>
             <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 16 }}>
-              <div className="ab-h4" style={{ fontSize: 17 }}>Recent work</div>
-              <Link href="/dashboard/gallery" style={{ fontSize: 13, color: "var(--acc)", textDecoration: "none" }}>Gallery →</Link>
+              <div className="ab-h4" style={{ fontSize: 17 }}>{h.recentWork}</div>
+              <Link href="/dashboard/gallery" style={{ fontSize: 13, color: "var(--acc)", textDecoration: "none" }}>{h.galleryLink}</Link>
             </div>
             {recent.length === 0 ? (
               <div style={{ padding: "40px 20px", textAlign: "center", border: "1.5px dashed var(--border-strong)", borderRadius: 14, color: "var(--t-2)" }}>
-                <div style={{ fontSize: 14, fontWeight: 600, color: "var(--t-1)" }}>Nothing here yet</div>
-                <div className="ab-body" style={{ fontSize: 12.5, marginTop: 4 }}>Your generated images will show up here automatically.</div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: "var(--t-1)" }}>{h.nothingYet}</div>
+                <div className="ab-body" style={{ fontSize: 12.5, marginTop: 4 }}>{h.nothingYetSub}</div>
               </div>
             ) : (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 12 }}>
@@ -135,11 +136,11 @@ export default function DashHome({ name, credits, items, successRate }: { name: 
                         </>
                       ) : (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={thumbSrc(g.url)} alt={TOOL_LABEL[g.tool ?? ""] ?? "Generation"} loading="lazy" decoding="async" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+                        <img src={thumbSrc(g.url)} alt={toolLabel(g.tool)} loading="lazy" decoding="async" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
                       )}
                     </div>
-                    <div style={{ fontSize: 12, fontWeight: 600, marginTop: 7, letterSpacing: "-0.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{TOOL_LABEL[g.tool ?? ""] ?? "Image"}</div>
-                    <div className="ab-mono" style={{ fontSize: 9.5, color: "var(--t-3)", marginTop: 1 }}>{ago(g.createdAt)} ago</div>
+                    <div style={{ fontSize: 12, fontWeight: 600, marginTop: 7, letterSpacing: "-0.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{toolLabel(g.tool)}</div>
+                    <div className="ab-mono" style={{ fontSize: 9.5, color: "var(--t-3)", marginTop: 1 }}>{ago(g.createdAt)} {h.agoSuffix}</div>
                   </Link>
                 ))}
               </div>
@@ -147,7 +148,7 @@ export default function DashHome({ name, credits, items, successRate }: { name: 
             {/* usage chart */}
             <div className="ab-card" style={{ padding: 20, marginTop: 20 }}>
               <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 16 }}>
-                <div className="ab-h4" style={{ fontSize: 15 }}>Generations this week</div>
+                <div className="ab-h4" style={{ fontSize: 15 }}>{h.generationsThisWeek}</div>
                 <div style={{ fontSize: 13, color: "var(--acc)", fontWeight: 600 }}>{weekItems.length}</div>
               </div>
               <div style={{ display: "flex", gap: 8, height: 90, alignItems: "flex-end" }}>
@@ -161,11 +162,11 @@ export default function DashHome({ name, credits, items, successRate }: { name: 
             </div>
           </div>
           <div>
-            <div className="ab-h4" style={{ fontSize: 17, marginBottom: 16 }}>Activity</div>
+            <div className="ab-h4" style={{ fontSize: 17, marginBottom: 16 }}>{h.activity}</div>
             {activity.length === 0 ? (
               <div className="ab-card" style={{ padding: "32px 20px", textAlign: "center", color: "var(--t-2)" }}>
-                <div style={{ fontSize: 14, fontWeight: 600, color: "var(--t-1)" }}>No activity yet</div>
-                <div className="ab-body" style={{ fontSize: 12.5, marginTop: 4 }}>Generate your first image to get started.</div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: "var(--t-1)" }}>{h.noActivity}</div>
+                <div className="ab-body" style={{ fontSize: 12.5, marginTop: 4 }}>{h.noActivitySub}</div>
               </div>
             ) : (
               <div className="ab-card" style={{ overflow: "hidden" }}>
@@ -173,8 +174,8 @@ export default function DashHome({ name, credits, items, successRate }: { name: 
                   <div key={a.id} style={{ display: "flex", alignItems: "center", gap: 13, padding: "15px 16px", borderBottom: i < activity.length - 1 ? "1px solid var(--border)" : "none" }}>
                     <div style={{ width: 36, height: 36, borderRadius: 11, background: TOOL_TONE[a.tool ?? ""] ?? "var(--bg-2)", color: "oklch(1 0 0 / 0.95)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><Icon name={TOOL_ICON[a.tool ?? ""] ?? "sparkle-fill"} size={17} /></div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 13.5, fontWeight: 600, letterSpacing: "-0.01em" }}>Generated · {TOOL_LABEL[a.tool ?? ""] ?? "Image"}</div>
-                      <div className="ab-body" style={{ fontSize: 12, marginTop: 1 }}>Saved to gallery</div>
+                      <div style={{ fontSize: 13.5, fontWeight: 600, letterSpacing: "-0.01em" }}>{h.generated} · {toolLabel(a.tool)}</div>
+                      <div className="ab-body" style={{ fontSize: 12, marginTop: 1 }}>{h.savedToGallery}</div>
                     </div>
                     <span className="ab-mono" style={{ fontSize: 10, color: "var(--t-3)" }}>{ago(a.createdAt)}</span>
                   </div>
@@ -185,13 +186,13 @@ export default function DashHome({ name, credits, items, successRate }: { name: 
             <div style={{ marginTop: 16, padding: 18, borderRadius: 16, background: "linear-gradient(160deg, var(--acc-soft), transparent)", border: "1px solid var(--acc-line)", position: "relative", overflow: "hidden" }}>
               <div className="ab-glow" style={{ width: 120, height: 120, background: "var(--acc)", bottom: -50, right: -30, opacity: 0.25 }} />
               <div style={{ position: "relative" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 14, fontWeight: 700 }}><Icon name="crown" size={16} style={{ color: "var(--acc)" }} /> {lowCredits ? "Running low" : "Your credits"}</div>
+                <div style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 14, fontWeight: 700 }}><Icon name="crown" size={16} style={{ color: "var(--acc)" }} /> {lowCredits ? h.runningLow : h.yourCredits}</div>
                 <div className="ab-body" style={{ fontSize: 12.5, marginTop: 6 }}>
                   {lowCredits
-                    ? `Only ${credits} credits left — top up to keep generating.`
-                    : `You have ${credits} credits — about ${approxGens} more ${approxGens === 1 ? "generation" : "generations"}.`}
+                    ? h.lowMsg.replace("{n}", String(credits))
+                    : h.okMsg.replace("{n}", String(credits)).replace("{g}", String(approxGens))}
                 </div>
-                <Link href="/dashboard/credits" className="ab-btn ab-btn-primary ab-btn-sm" style={{ marginTop: 12 }}>Buy credits</Link>
+                <Link href="/dashboard/credits" className="ab-btn ab-btn-primary ab-btn-sm" style={{ marginTop: 12 }}>{h.buyCredits}</Link>
               </div>
             </div>
           </div>

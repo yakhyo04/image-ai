@@ -6,6 +6,7 @@ import DashFrame from "./DashFrame";
 import { ChipRow, SegRow } from "./controls";
 import { downloadDataUrl } from "./lib";
 import { useCredits } from "@/store/credits";
+import { useDict } from "@/i18n/context";
 
 /** CSS-only pattern tile so empty/placeholder previews read as a real repeat. */
 function patternBg(hue: number, light = 0.42): CSSProperties {
@@ -55,6 +56,9 @@ export default function DashPatterns() {
   const [result, setResult] = useState<string | null>(null);
   const [tiles, setTiles] = useState<string[]>([]);
   const setCredits = useCredits((s) => s.setCredits);
+  const dict = useDict();
+  const tl = dict.dash.tools;
+  const p = tl.patterns;
 
   const hue = MOTIFS[motif].hue;
   const tilePx = [34, 48, 72][scale];
@@ -85,7 +89,7 @@ export default function DashPatterns() {
       setTiles((prev) => [dataUrl, ...prev].slice(0, 6));
       if (typeof data.credits === "number") setCredits(data.credits);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Generation failed");
+      setError(e instanceof Error ? e.message : tl.generationFailed);
     } finally {
       setBusy(false);
     }
@@ -96,17 +100,17 @@ export default function DashPatterns() {
       <div className="ab-dash-cols" style={{ display: "grid", gridTemplateColumns: "316px 1fr 296px", minHeight: "100%" }}>
         {/* LEFT controls */}
         <div style={{ borderRight: "1px solid var(--border)", padding: 20 }}>
-          <div className="ab-eyebrow" style={{ marginBottom: 12 }}>01 · Describe a motif</div>
+          <div className="ab-eyebrow" style={{ marginBottom: 12 }}>01 · {p.describeMotif}</div>
           <div style={{ borderRadius: 13, border: "1px solid var(--border-mid)", background: "var(--bg-1)", padding: 14 }}>
             <textarea
               value={desc}
               onChange={(e) => setDesc(e.target.value.slice(0, 200))}
               rows={3}
-              placeholder="Describe the motif — e.g. folk floral, terracotta & cream, small blossoms…"
+              placeholder={p.placeholder}
               style={{ width: "100%", resize: "none", border: "none", outline: "none", background: "transparent", color: "var(--t-1)", fontSize: 14, lineHeight: 1.5, fontFamily: "var(--font)" }}
             />
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 12 }}>
-              <button onClick={() => addQuick("seamless repeat")} className="ab-chip" style={{ padding: "5px 10px", fontSize: 11, cursor: "pointer" }}><Icon name="wand" size={12} /> Suggest</button>
+              <button onClick={() => addQuick("seamless repeat")} className="ab-chip" style={{ padding: "5px 10px", fontSize: 11, cursor: "pointer" }}><Icon name="wand" size={12} /> {p.suggest}</button>
               <div style={{ flex: 1 }} />
               <span className="ab-mono" style={{ color: "var(--t-4)", fontSize: 10 }}>{desc.length} / 200</span>
             </div>
@@ -115,26 +119,26 @@ export default function DashPatterns() {
             {QUICK.map((p) => <button key={p} onClick={() => addQuick(p)} className="ab-chip" style={{ padding: "6px 11px", fontSize: 11, cursor: "pointer" }}>{p}</button>)}
           </div>
 
-          <div className="ab-eyebrow" style={{ margin: "22px 0 10px" }}>02 · Motif style</div>
+          <div className="ab-eyebrow" style={{ margin: "22px 0 10px" }}>02 · {p.motifStyle}</div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
             {MOTIFS.map((m, i) => <TileSwatch key={i} hue={m.hue} label={m.label} sel={motif === i} onClick={() => setMotif(i)} />)}
           </div>
 
-          <div className="ab-eyebrow" style={{ margin: "22px 0 10px" }}>03 · Palette</div>
+          <div className="ab-eyebrow" style={{ margin: "22px 0 10px" }}>03 · {p.palette}</div>
           <ChipRow items={PALETTES} value={palette} onChange={setPalette} />
 
-          <div className="ab-eyebrow" style={{ margin: "22px 0 10px" }}>04 · Scale & density</div>
+          <div className="ab-eyebrow" style={{ margin: "22px 0 10px" }}>04 · {p.scaleDensity}</div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
             {SCALES.map((s, i) => (
               <button key={s} onClick={() => setScale(i)} style={{ height: 44, borderRadius: 10, border: `1px solid ${scale === i ? "var(--acc)" : "var(--border)"}`, background: scale === i ? "var(--acc-soft)" : "var(--bg-1)", color: scale === i ? "var(--acc)" : "var(--t-2)", fontFamily: "var(--font-mono)", fontSize: 11.5, fontWeight: 600, cursor: "pointer" }}>{s}</button>
             ))}
           </div>
 
-          <div className="ab-eyebrow" style={{ margin: "22px 0 10px" }}>05 · Colorways</div>
+          <div className="ab-eyebrow" style={{ margin: "22px 0 10px" }}>05 · {p.colorways}</div>
           <SegRow items={["1", "3", "6"]} value={ways} onChange={setWays} />
 
           <button onClick={generate} disabled={busy} className="ab-btn ab-btn-primary ab-btn-full ab-btn-lg" style={{ marginTop: 20, opacity: busy ? 0.7 : 1 }}>
-            {busy ? <><span style={{ width: 15, height: 15, borderRadius: "50%", border: "2px solid var(--acc-ink)", borderTopColor: "transparent", animation: "ab-spin .7s linear infinite" }} /> Generating…</> : <><Icon name="sparkle-fill" size={18} /> Generate · 10 credits</>}
+            {busy ? <><span style={{ width: 15, height: 15, borderRadius: "50%", border: "2px solid var(--acc-ink)", borderTopColor: "transparent", animation: "ab-spin .7s linear infinite" }} /> {tl.generating}</> : <><Icon name="sparkle-fill" size={18} /> {tl.generateN.replace("{n}", "10")}</>}
           </button>
           {error && <div style={{ marginTop: 12, padding: "10px 12px", borderRadius: 10, background: "oklch(0.7 0.21 22 / 0.12)", border: "1px solid oklch(0.7 0.21 22 / 0.4)", color: "var(--err)", fontSize: 12.5 }}>{error}</div>}
         </div>
@@ -143,18 +147,18 @@ export default function DashPatterns() {
         <div className="ab-canvas-col" style={{ display: "flex", flexDirection: "column", minWidth: 0, alignSelf: "start", position: "sticky", top: 0, height: "calc(100dvh - 64px)" }}>
           <div style={{ height: 52, borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 8, padding: "0 18px" }}>
             <span className="ab-chip ab-chip-acc" style={{ padding: "4px 10px" }}>
-              {busy ? <><span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--acc)", animation: "ab-blink .8s ease infinite" }} /> Rendering</> : <><Icon name="check" size={12} stroke={3} /> Seamless</>}
+              {busy ? <><span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--acc)", animation: "ab-blink .8s ease infinite" }} /> {tl.rendering}</> : <><Icon name="check" size={12} stroke={3} /> {p.seamless}</>}
             </span>
             <span className="ab-mono" style={{ color: "var(--t-3)" }}>{MOTIFS[motif].label} · tile 512px · repeat ∞</span>
             <div style={{ flex: 1 }} />
-            {result && <button onClick={() => downloadDataUrl(result, "pattern-tile.png")} className="ab-btn ab-btn-ghost ab-btn-sm"><Icon name="download" size={14} /> Save</button>}
+            {result && <button onClick={() => downloadDataUrl(result, "pattern-tile.png")} className="ab-btn ab-btn-ghost ab-btn-sm"><Icon name="download" size={14} /> {tl.save}</button>}
           </div>
           <div style={{ flex: 1, minHeight: "calc(100dvh - 116px)", minWidth: 0, display: "flex", alignItems: "center", justifyContent: "center", padding: 36, position: "relative", backgroundImage: "radial-gradient(var(--border) 1px, transparent 1px)", backgroundSize: "22px 22px", overflow: "hidden" }}>
             {busy ? (
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14, color: "var(--t-2)" }}>
                 <div style={{ width: 44, height: 44, borderRadius: "50%", border: "3px solid var(--bg-3)", borderTopColor: "var(--acc)", animation: "ab-spin .7s linear infinite" }} />
-                <div style={{ fontSize: 14, fontWeight: 600 }}>Weaving your tile…</div>
-                <div className="ab-mono" style={{ fontSize: 11, color: "var(--t-3)" }}>Nano Banana Pro · up to ~60s</div>
+                <div style={{ fontSize: 14, fontWeight: 600 }}>{p.weaving}</div>
+                <div className="ab-mono" style={{ fontSize: 11, color: "var(--t-3)" }}>{tl.modelNote}</div>
               </div>
             ) : (
               <div
@@ -166,7 +170,7 @@ export default function DashPatterns() {
                 }}
               >
                 <div style={{ position: "absolute", top: 24, left: 24, width: result ? "33.34%" : tilePx * 3, height: result ? "33.34%" : tilePx * 3, border: "1.5px dashed oklch(1 0 0 / 0.55)", borderRadius: 6 }}>
-                  <span style={{ position: "absolute", top: -22, left: 0, fontFamily: "var(--font-mono)", fontSize: 10, color: "oklch(1 0 0 / 0.85)", background: "oklch(0 0 0 / 0.45)", padding: "2px 7px", borderRadius: 100 }}>1 REPEAT</span>
+                  <span style={{ position: "absolute", top: -22, left: 0, fontFamily: "var(--font-mono)", fontSize: 10, color: "oklch(1 0 0 / 0.85)", background: "oklch(0 0 0 / 0.45)", padding: "2px 7px", borderRadius: 100 }}>{p.oneRepeat}</span>
                 </div>
                 <div style={{ position: "absolute", bottom: 14, right: 14, fontFamily: "var(--font-mono)", fontSize: 10, color: "oklch(1 0 0 / 0.9)", background: "oklch(0 0 0 / 0.45)", backdropFilter: "blur(8px)", padding: "4px 10px", borderRadius: 100 }}>{MOTIFS[motif].label.toUpperCase()} · SEAMLESS</div>
               </div>
@@ -176,7 +180,7 @@ export default function DashPatterns() {
 
         {/* RIGHT — colorways + export */}
         <div style={{ borderLeft: "1px solid var(--border)", padding: 20 }}>
-          <div className="ab-eyebrow" style={{ marginBottom: 12 }}>Colorways</div>
+          <div className="ab-eyebrow" style={{ marginBottom: 12 }}>{p.colorways}</div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
             {[0, 1, 2, 3, 4].map((i) => {
               const t = tiles[i];
@@ -198,9 +202,9 @@ export default function DashPatterns() {
             })}
             <button onClick={generate} disabled={busy} style={{ aspectRatio: "1/1", borderRadius: 11, border: "1.5px dashed var(--border-mid)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--t-3)", cursor: "pointer", background: "transparent" }}><Icon name="plus" size={18} /></button>
           </div>
-          <button onClick={generate} disabled={busy} className="ab-btn ab-btn-ghost ab-btn-full ab-btn-sm" style={{ marginTop: 12, opacity: busy ? 0.5 : 1 }}><Icon name="sparkle" size={14} /> Regenerate</button>
+          <button onClick={generate} disabled={busy} className="ab-btn ab-btn-ghost ab-btn-full ab-btn-sm" style={{ marginTop: 12, opacity: busy ? 0.5 : 1 }}><Icon name="sparkle" size={14} /> {tl.regenerate}</button>
 
-          <div className="ab-eyebrow" style={{ margin: "24px 0 12px" }}>Export</div>
+          <div className="ab-eyebrow" style={{ margin: "24px 0 12px" }}>{tl.exportLabel}</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {EXPORTS.map(([m, s]) => (
               <div key={m} onClick={() => result && downloadDataUrl(result, `${m.split(" ")[0].toLowerCase()}-pattern.png`)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 11, background: "var(--bg-1)", border: "1px solid var(--border)", cursor: result ? "pointer" : "default", opacity: result ? 1 : 0.55 }}>
@@ -210,10 +214,10 @@ export default function DashPatterns() {
               </div>
             ))}
           </div>
-          <button onClick={() => result && downloadDataUrl(result, "pattern-tile-hd.png")} disabled={!result} className="ab-btn ab-btn-primary ab-btn-full" style={{ marginTop: 14, opacity: result ? 1 : 0.5 }}><Icon name="download" size={16} stroke={2} /> Download tile</button>
+          <button onClick={() => result && downloadDataUrl(result, "pattern-tile-hd.png")} disabled={!result} className="ab-btn ab-btn-primary ab-btn-full" style={{ marginTop: 14, opacity: result ? 1 : 0.5 }}><Icon name="download" size={16} stroke={2} /> {p.downloadTile}</button>
           <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-            <button className="ab-btn ab-btn-ghost" style={{ flex: 1 }}><Icon name="share" size={15} /> Share</button>
-            <button className="ab-btn ab-btn-ghost" style={{ flex: 1 }}><Icon name="heart" size={15} /> Save</button>
+            <button className="ab-btn ab-btn-ghost" style={{ flex: 1 }}><Icon name="share" size={15} /> {tl.share}</button>
+            <button className="ab-btn ab-btn-ghost" style={{ flex: 1 }}><Icon name="heart" size={15} /> {tl.save}</button>
           </div>
         </div>
       </div>

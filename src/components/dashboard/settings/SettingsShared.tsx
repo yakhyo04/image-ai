@@ -5,15 +5,17 @@ import Link from "next/link";
 import { Icon } from "@/components/landing/ui";
 import DashFrame from "../DashFrame";
 import { Toggle } from "../controls";
+import { useDict } from "@/i18n/context";
 
 export const SETTINGS_NAV = [
-  { id: "profile", icon: "user", label: "Profile", href: "/dashboard/settings" },
-  { id: "brand", icon: "palette", label: "Brand kit", href: "/dashboard/settings/brand" },
-  { id: "prefs", icon: "sliders", label: "Preferences", href: "/dashboard/settings/preferences" },
-  { id: "notif", icon: "bell", label: "Notifications", href: "/dashboard/settings/notifications" },
-];
+  { id: "profile", icon: "user", href: "/dashboard/settings" },
+  { id: "brand", icon: "palette", href: "/dashboard/settings/brand" },
+  { id: "prefs", icon: "sliders", href: "/dashboard/settings/preferences" },
+  { id: "notif", icon: "bell", href: "/dashboard/settings/notifications" },
+] as const;
 
 export function SettingsScaffold({ active, title, sub, children, footer = true }: { active: string; title: string; sub: string; children: ReactNode; footer?: boolean }) {
+  const t = useDict();
   return (
     <DashFrame active="settings" title="Settings">
       <div className="ab-dash-settings" style={{ display: "grid", gridTemplateColumns: "220px 1fr", minHeight: "100%" }}>
@@ -23,7 +25,7 @@ export function SettingsScaffold({ active, title, sub, children, footer = true }
             return (
               <Link key={n.id} href={n.href} style={{ display: "flex", alignItems: "center", gap: 11, padding: "11px 12px", borderRadius: 11, cursor: "pointer", marginBottom: 2, textDecoration: "none", background: on ? "var(--bg-2)" : "transparent", color: on ? "var(--t-1)" : "var(--t-3)", border: on ? "1px solid var(--border)" : "1px solid transparent" }}>
                 <Icon name={n.icon} size={18} style={{ color: on ? "var(--acc)" : "var(--t-3)" }} />
-                <span style={{ fontSize: 13.5, fontWeight: on ? 600 : 500 }}>{n.label}</span>
+                <span style={{ fontSize: 13.5, fontWeight: on ? 600 : 500 }}>{t.dash.settings.nav[n.id]}</span>
               </Link>
             );
           })}
@@ -34,8 +36,8 @@ export function SettingsScaffold({ active, title, sub, children, footer = true }
           {children}
           {footer && (
             <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 10, marginTop: 28 }}>
-              <button className="ab-btn ab-btn-ghost">Cancel</button>
-              <button className="ab-btn ab-btn-primary"><Icon name="check" size={16} stroke={2.4} /> Save changes</button>
+              <button className="ab-btn ab-btn-ghost">{t.dash.settings.cancel}</button>
+              <button className="ab-btn ab-btn-primary"><Icon name="check" size={16} stroke={2.4} /> {t.dash.settings.save}</button>
             </div>
           )}
         </div>
