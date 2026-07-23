@@ -37,7 +37,7 @@ export function LangSwitch() {
   );
 }
 
-export default function Nav() {
+export default function Nav({ authed = false }: { authed?: boolean }) {
   const [open, setOpen] = useState(false);
   return (
     <header
@@ -59,10 +59,18 @@ export default function Nav() {
         <div style={{ flex: 1 }} />
 
         <div className="ab-nav-actions">
-          <Link href="/login" className="ab-nav-link">Log in</Link>
-          <Link href="/signup" className="ab-btn ab-btn-grad ab-btn-sm" style={{ padding: "10px 18px" }}>
-            Get Started <Icon name="arrow-right" size={15} stroke={2.2} />
-          </Link>
+          {authed ? (
+            <Link href="/dashboard" className="ab-btn ab-btn-grad ab-btn-sm" style={{ padding: "10px 18px" }}>
+              Dashboard <Icon name="arrow-right" size={15} stroke={2.2} />
+            </Link>
+          ) : (
+            <>
+              <Link href="/login" className="ab-nav-link">Log in</Link>
+              <Link href="/signup" className="ab-btn ab-btn-grad ab-btn-sm" style={{ padding: "10px 18px" }}>
+                Get Started <Icon name="arrow-right" size={15} stroke={2.2} />
+              </Link>
+            </>
+          )}
         </div>
 
         <div className="ab-nav-mobile">
@@ -84,8 +92,14 @@ export default function Nav() {
             ))}
           </nav>
           <div style={{ marginTop: 14, display: "flex", alignItems: "center", gap: 10 }}>
-            <Link href="/login" className="ab-btn ab-btn-ghost ab-btn-sm" style={{ flex: 1 }}>Log in</Link>
-            <Link href="/signup" className="ab-btn ab-btn-grad ab-btn-sm" style={{ flex: 1 }}>Get Started</Link>
+            {authed ? (
+              <Link href="/dashboard" onClick={() => setOpen(false)} className="ab-btn ab-btn-grad ab-btn-sm" style={{ flex: 1 }}>Dashboard</Link>
+            ) : (
+              <>
+                <Link href="/login" onClick={() => setOpen(false)} className="ab-btn ab-btn-ghost ab-btn-sm" style={{ flex: 1 }}>Log in</Link>
+                <Link href="/signup" onClick={() => setOpen(false)} className="ab-btn ab-btn-grad ab-btn-sm" style={{ flex: 1 }}>Get Started</Link>
+              </>
+            )}
           </div>
         </div>
       )}

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Icon } from "@/components/landing/ui";
 import DashFrame from "./DashFrame";
 import type { GalleryItem } from "@/lib/generations";
+import { thumbSrc } from "@/lib/img";
 
 // Maps stored tool keys → display label + filter bucket.
 const TOOL_LABELS: Record<string, string> = {
@@ -85,7 +86,7 @@ export default function GalleryView({ items }: { items: GalleryItem[] }) {
           <video src={it.url} muted loop playsInline preload="metadata" style={mediaStyle} />
         ) : (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={it.url} alt={TOOL_LABELS[it.tool ?? ""] ?? "Generation"} loading="lazy" decoding="async" style={mediaStyle} />
+          <img src={thumbSrc(it.url)} alt={TOOL_LABELS[it.tool ?? ""] ?? "Generation"} loading="lazy" decoding="async" style={mediaStyle} />
         )}
         {isVideo(it) && (
           <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>

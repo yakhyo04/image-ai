@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/client";
 import { triggerDownload } from "@/lib/imageExport";
 import { resizeVideo, VIDEO_SIZES } from "@/lib/videoExport";
 import type { GenerationDetail } from "@/lib/generations";
+import { thumbSrc } from "@/lib/img";
 
 const TOOL_LABELS: Record<string, string> = {
   infographics: "Infographic",
@@ -107,7 +108,7 @@ export default function GalleryDetail({ item }: { item: GenerationDetail }) {
             ) : (
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                src={item.url}
+                src={thumbSrc(item.url, 1200, 75)}
                 alt={label}
                 style={{ display: "block", maxWidth: "100%", maxHeight: "72vh", height: "auto", borderRadius: 10 }}
               />

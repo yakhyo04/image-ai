@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Icon } from "@/components/landing/ui";
 import DashFrame from "./DashFrame";
 import type { GalleryItem } from "@/lib/generations";
+import { thumbSrc } from "@/lib/img";
 
 const TOOLS = [
   { id: "infographics", icon: "sliders", title: "Infographics", tone: "oklch(0.34 0.07 200)", href: "/dashboard/infographics", hot: true },
@@ -134,7 +135,7 @@ export default function DashHome({ name, credits, items, successRate }: { name: 
                         </>
                       ) : (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={g.url} alt={TOOL_LABEL[g.tool ?? ""] ?? "Generation"} loading="lazy" decoding="async" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+                        <img src={thumbSrc(g.url)} alt={TOOL_LABEL[g.tool ?? ""] ?? "Generation"} loading="lazy" decoding="async" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
                       )}
                     </div>
                     <div style={{ fontSize: 12, fontWeight: 600, marginTop: 7, letterSpacing: "-0.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{TOOL_LABEL[g.tool ?? ""] ?? "Image"}</div>
