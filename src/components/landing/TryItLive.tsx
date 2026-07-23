@@ -2,14 +2,16 @@
 
 import { useState } from "react";
 import { Section, Icon } from "./ui";
+import { useDict } from "@/i18n/context";
 
-const PRESETS = ["Infographic", "Lifestyle", "Studio", "Interior"];
+const PRESETS = ["Infographic", "Lifestyle", "Studio", "Interior"] as const;
 const TONES = ["oklch(0.34 0.07 200)", "oklch(0.36 0.08 25)", "oklch(0.3 0.03 250)", "oklch(0.33 0.06 130)"];
 const PRESET_ICONS = ["sliders", "sparkle-fill", "image", "sofa"];
 
 export default function TryItLive() {
   const [sel, setSel] = useState(0);
   const [busy, setBusy] = useState(false);
+  const t = useDict();
   const run = () => { setBusy(true); setTimeout(() => setBusy(false), 1600); };
 
   return (
@@ -19,11 +21,11 @@ export default function TryItLive() {
         <div className="ab-demo-grid" style={{ display: "grid", gridTemplateColumns: "340px 1fr", minHeight: 460 }}>
           {/* control panel */}
           <div className="ab-demo-panel" style={{ padding: 32, borderRight: "1px solid var(--border)", display: "flex", flexDirection: "column" }}>
-            <div className="ab-chip ab-chip-acc" style={{ alignSelf: "flex-start", marginBottom: 20 }}><Icon name="magic" size={12} /> Try it live</div>
-            <div className="ab-h3" style={{ fontSize: 24 }}>Generate a sample</div>
-            <div className="ab-body" style={{ fontSize: 14, marginTop: 8 }}>Pick a style and hit generate — no signup.</div>
+            <div className="ab-chip ab-chip-acc" style={{ alignSelf: "flex-start", marginBottom: 20 }}><Icon name="magic" size={12} /> {t.tryItLive.badge}</div>
+            <div className="ab-h3" style={{ fontSize: 24 }}>{t.tryItLive.title}</div>
+            <div className="ab-body" style={{ fontSize: 14, marginTop: 8 }}>{t.tryItLive.sub}</div>
 
-            <div className="ab-eyebrow" style={{ marginTop: 28, marginBottom: 12 }}>Style preset</div>
+            <div className="ab-eyebrow" style={{ marginTop: 28, marginBottom: 12 }}>{t.tryItLive.stylePreset}</div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
               {PRESETS.map((pre, i) => (
                 <button key={pre} onClick={() => setSel(i)} style={{
@@ -33,7 +35,7 @@ export default function TryItLive() {
                   color: sel === i ? "var(--acc)" : "var(--t-2)", transition: "all .15s ease",
                 }}>
                   <Icon name={PRESET_ICONS[i]} size={18} />
-                  <div style={{ fontSize: 13, fontWeight: 600, marginTop: 8 }}>{pre}</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, marginTop: 8 }}>{t.tryItLive.presets[pre]}</div>
                 </button>
               ))}
             </div>
@@ -41,9 +43,9 @@ export default function TryItLive() {
             <div style={{ flex: 1, minHeight: 28 }} />
             <button onClick={run} disabled={busy} className="ab-btn ab-btn-primary ab-btn-full ab-btn-lg" style={{ marginTop: 28 }}>
               {busy ? (
-                <><span style={{ width: 14, height: 14, borderRadius: "50%", border: "2px solid var(--acc-ink)", borderTopColor: "transparent", display: "inline-block", animation: "ab-spin .7s linear infinite" }} /> Generating…</>
+                <><span style={{ width: 14, height: 14, borderRadius: "50%", border: "2px solid var(--acc-ink)", borderTopColor: "transparent", display: "inline-block", animation: "ab-spin .7s linear infinite" }} /> {t.tryItLive.generating}</>
               ) : (
-                <><Icon name="sparkle-fill" size={17} /> Generate · 1 credit</>
+                <><Icon name="sparkle-fill" size={17} /> {t.tryItLive.generate}</>
               )}
             </button>
           </div>
@@ -54,7 +56,7 @@ export default function TryItLive() {
               <div style={{ position: "absolute", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "40%", height: "78%", borderRadius: "46% 46% 0 0 / 26% 26% 0 0", background: "radial-gradient(ellipse at 50% 28%, oklch(1 0 0 / 0.18), transparent)" }} />
               {busy && <div style={{ position: "absolute", left: 0, right: 0, top: "50%", height: 3, background: "var(--acc)", boxShadow: "0 0 20px var(--acc)", animation: "ab-blink 0.8s ease infinite" }} />}
               <div style={{ position: "absolute", top: 14, left: 14, fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.08em", color: busy ? "var(--acc)" : "oklch(1 0 0 / 0.85)", background: "oklch(0 0 0 / 0.45)", backdropFilter: "blur(8px)", padding: "4px 10px", borderRadius: 100, fontWeight: 600 }}>
-                {busy ? "RENDERING…" : `${PRESETS[sel].toUpperCase()} · READY`}
+                {busy ? t.tryItLive.rendering : `${t.tryItLive.presets[PRESETS[sel]].toUpperCase()} · ${t.tryItLive.ready}`}
               </div>
               <div style={{ position: "absolute", bottom: 14, right: 14, display: "flex", gap: 7 }}>
                 <button style={{ width: 36, height: 36, borderRadius: 10, background: "oklch(0 0 0 / 0.5)", backdropFilter: "blur(8px)", border: "1px solid oklch(1 0 0 / 0.15)", color: "oklch(1 0 0 / 0.9)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}><Icon name="download" size={16} /></button>

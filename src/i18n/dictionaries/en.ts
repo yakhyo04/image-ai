@@ -1,0 +1,162 @@
+// English dictionary — the source of truth. Other locales mirror this shape
+// (typed as `Dict`). Titles containing "{x}" mark the accent-highlighted span.
+export const en = {
+  nav: {
+    features: "Features",
+    pricing: "Pricing",
+    gallery: "Gallery",
+    docs: "Docs",
+    login: "Log in",
+    getStarted: "Get Started",
+    dashboard: "Dashboard",
+  },
+  hero: {
+    badge: "AI visuals for marketplace sellers",
+    title: "Generate stunning {x} in seconds",
+    titleAccent: "marketplace visuals",
+    subtitle:
+      "Turn a plain product photo into polished infographics, lifestyle shots, and listing-ready cards — no studio, no designer, no waiting.",
+    ctaPrimary: "Start generating free",
+    ctaDemo: "Watch demo",
+    sellers: "2,400+ sellers",
+    rating: "4.9 / 5",
+    conversion: "+38% conversion",
+    conversionSub: "avg. listing uplift",
+  },
+  beforeAfter: {
+    before: "Plain product",
+    after: "Generated",
+  },
+  logos: {
+    eyebrow: "Trusted by sellers on every major marketplace",
+  },
+  features: {
+    tag: "Six tools, one studio",
+    title: "Everything you need to sell better",
+    sub: "A complete visual toolkit built for marketplace sellers — not a general-purpose image generator.",
+    learnMore: "Learn more",
+    items: {
+      infographics: { title: "Marketplace Infographics", desc: "Auto-generate feature callouts, badges, and benefit text sized for every marketplace." },
+      editor: { title: "Photo Editing", desc: "Inpaint, retouch, and restyle with a simple brush-and-prompt workflow." },
+      interior: { title: "Interior Design", desc: "Drop furniture and decor into staged rooms, or restyle a space in any aesthetic." },
+      mockups: { title: "Product Mockups", desc: "Wrap your design onto packaging, apparel, and devices in photoreal scenes." },
+      backgrounds: { title: "Background Replacement", desc: "One-click cutouts with clean edges, then any backdrop you can describe." },
+      patterns: { title: "Pattern Design", desc: "Seamless, tileable patterns and textures for textiles, packaging, and prints." },
+    },
+  },
+  howItWorks: {
+    tag: "How it works",
+    title: "Three steps to a better listing",
+    sub: "No briefs, no revisions, no back-and-forth. From raw photo to ready in minutes.",
+    steps: {
+      upload: { title: "Upload", desc: "Drop a single product photo — phone snapshot is fine." },
+      style: { title: "Choose style", desc: "Pick a preset: infographic, lifestyle, studio, interior, mockup." },
+      generate: { title: "Generate", desc: "Get four polished, marketplace-ready variants in under two minutes." },
+    },
+  },
+  gallery: {
+    tag: "Gallery",
+    title: "Made with Artboard",
+    sub: "Real outputs across every tool and style preset.",
+    tabs: {
+      All: "All",
+      Infographics: "Infographics",
+      Interiors: "Interiors",
+      Mockups: "Mockups",
+      Patterns: "Patterns",
+    },
+    labels: {
+      Infographic: "Infographic",
+      Interior: "Interior",
+      Mockup: "Mockup",
+      Lifestyle: "Lifestyle",
+      Pattern: "Pattern",
+      Background: "Background",
+    },
+  },
+  tryItLive: {
+    badge: "Try it live",
+    title: "Generate a sample",
+    sub: "Pick a style and hit generate — no signup.",
+    stylePreset: "Style preset",
+    presets: { Infographic: "Infographic", Lifestyle: "Lifestyle", Studio: "Studio", Interior: "Interior" },
+    generate: "Generate · 1 credit",
+    generating: "Generating…",
+    ready: "READY",
+    rendering: "RENDERING…",
+  },
+  pricing: {
+    tag: "Pricing",
+    title: "Plans that scale with your store",
+    sub: "Start free. Upgrade when you’re ready. Cancel anytime — pay with Click, Payme, or card.",
+    mostPopular: "Most popular",
+    startFree: "Start free",
+    choose: "Choose {name}",
+    perMonth: "/mo",
+    tiers: {
+      starter: {
+        name: "Starter",
+        desc: "For trying things out",
+        credits: "30 credits / mo",
+        feats: ["All 6 tools", "Standard quality", "720p exports", "Community support"],
+      },
+      pro: {
+        name: "Pro",
+        desc: "For active sellers",
+        credits: "500 credits / mo",
+        feats: ["Everything in Starter", "Priority generation · 2×", "HD & 4K exports", "Marketplace size presets", "Commercial license", "No watermark"],
+      },
+      business: {
+        name: "Business",
+        desc: "For teams & agencies",
+        credits: "2,000 credits / mo",
+        feats: ["Everything in Pro", "5 team seats", "Brand kit & presets", "API access", "Dedicated support"],
+      },
+    },
+  },
+  testimonials: {
+    tag: "Loved by sellers",
+    title: "Results, not just renders",
+    quotes: [
+      "We replaced a $400/shoot photographer with Artboard. Our infographics convert better than the originals.",
+      "Background replacement alone saves me three hours a week. The cutouts are genuinely clean.",
+      "Interior staging for our furniture listings looks like a real studio set. Customers ask which showroom it is.",
+      "I launched 60 product cards in a weekend. Before Artboard that was a month of designer back-and-forth.",
+    ],
+  },
+  faq: {
+    tag: "FAQ",
+    title: "Questions, answered",
+    contactPrompt: "Can’t find what you’re looking for?",
+    contactBtn: "Contact support",
+    items: [
+      { q: "Do I need any design skills?", a: "None at all. Upload a product photo, pick a style preset, and Artboard handles composition, lighting, and text. You can fine-tune with a prompt if you want." },
+      { q: "Which marketplaces are supported?", a: "Exports come with size presets for Wildberries, Ozon, Uzum, Yandex Market, and more — including the exact pixel dimensions each platform requires." },
+      { q: "Can I generate text in Uzbek or Russian?", a: "Yes. On-image text can be generated in UZ, RU, or EN, and you can switch languages per generation without re-uploading." },
+      { q: "What about commercial rights?", a: "Pro and Business plans include a full commercial license. Everything you generate is yours to use in listings and ads." },
+      { q: "How do credits work?", a: "Each generation uses credits based on quality and tool. Unused monthly credits roll over for 30 days on paid plans." },
+    ],
+  },
+  cta: {
+    titleA: "Your next best-selling listing",
+    titleB: "starts with one photo.",
+    primary: "Start generating free",
+    demo: "Book a demo",
+  },
+  footer: {
+    tagline: "AI-generated marketplace visuals for sellers across Central Asia and beyond.",
+    columns: {
+      product: { h: "Product", links: ["Features", "Pricing", "Gallery", "Changelog", "Roadmap"] },
+      company: { h: "Company", links: ["About", "Blog", "Careers", "Contact"] },
+      resources: { h: "Resources", links: ["Docs", "API", "Marketplace guides", "Support"] },
+    },
+    copyright: "© 2026 Artboard. All rights reserved.",
+    privacy: "Privacy",
+    terms: "Terms",
+    newsletterTitle: "Get product updates",
+    newsletterSub: "New tools and styles, monthly. No spam.",
+    subscribe: "Subscribe",
+  },
+};
+
+export type Dict = typeof en;

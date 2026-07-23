@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { Section, Icon } from "./ui";
 import BeforeAfter from "./BeforeAfter";
+import { getDict } from "@/i18n/server";
 
-export default function Hero() {
+export default async function Hero() {
+  const t = await getDict();
+  const [titlePre, titlePost] = t.hero.title.split("{x}");
   return (
     <Section id="hero" pad="72px 100px 80px" style={{ overflow: "hidden" }}>
       <div className="ab-glow" style={{ width: 560, height: 420, background: "var(--acc)", top: -120, left: "50%", transform: "translateX(-50%)", opacity: 0.1 }} />
@@ -10,17 +13,17 @@ export default function Hero() {
         <div>
           <div className="ab-chip ab-chip-acc" style={{ marginBottom: 22 }}>
             <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--acc)", animation: "ab-blink 1.5s ease infinite" }} />
-            AI visuals for marketplace sellers
+            {t.hero.badge}
           </div>
           <h1 className="ab-display ab-hero-title">
-            Generate stunning <span style={{ color: "var(--acc)" }}>marketplace visuals</span> in seconds
+            {titlePre}<span style={{ color: "var(--acc)" }}>{t.hero.titleAccent}</span>{titlePost}
           </h1>
           <p className="ab-body" style={{ fontSize: 18, marginTop: 22, maxWidth: 460 }}>
-            Turn a plain product photo into polished infographics, lifestyle shots, and listing-ready cards — no studio, no designer, no waiting.
+            {t.hero.subtitle}
           </p>
           <div style={{ display: "flex", gap: 12, marginTop: 32, flexWrap: "wrap" }}>
-            <Link href="/dashboard" className="ab-btn ab-btn-grad ab-btn-lg">Start generating free <Icon name="arrow-right" size={17} stroke={2.2} /></Link>
-            <a href="#demo" className="ab-btn ab-btn-ghost ab-btn-lg"><Icon name="play" size={13} /> Watch demo</a>
+            <Link href="/dashboard" className="ab-btn ab-btn-grad ab-btn-lg">{t.hero.ctaPrimary} <Icon name="arrow-right" size={17} stroke={2.2} /></Link>
+            <a href="#demo" className="ab-btn ab-btn-ghost ab-btn-lg"><Icon name="play" size={13} /> {t.hero.ctaDemo}</a>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 20, marginTop: 32, flexWrap: "wrap" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -29,12 +32,12 @@ export default function Hero() {
                   <div key={i} style={{ width: 28, height: 28, borderRadius: "50%", background: c, border: "2px solid var(--bg)", marginLeft: i ? -8 : 0 }} />
                 ))}
               </div>
-              <span className="ab-body" style={{ fontSize: 13 }}>2,400+ sellers</span>
+              <span className="ab-body" style={{ fontSize: 13 }}>{t.hero.sellers}</span>
             </div>
             <div style={{ width: 1, height: 24, background: "var(--border)" }} />
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               {[1, 2, 3, 4, 5].map((i) => <Icon key={i} name="star-fill" size={14} style={{ color: "var(--acc)" }} />)}
-              <span className="ab-body" style={{ fontSize: 13, marginLeft: 4 }}>4.9 / 5</span>
+              <span className="ab-body" style={{ fontSize: 13, marginLeft: 4 }}>{t.hero.rating}</span>
             </div>
           </div>
         </div>
@@ -49,13 +52,13 @@ export default function Hero() {
               <span className="ab-mono" style={{ color: "var(--t-3)", marginLeft: 6 }}>artboard.ai / generate</span>
               <span className="ab-chip ab-chip-acc" style={{ marginLeft: "auto", padding: "3px 9px", fontSize: 10 }}><Icon name="bolt-fill" size={10} /> 1.8s</span>
             </div>
-            <BeforeAfter height={400} radius={16} />
+            <BeforeAfter height={400} radius={16} beforeLabel={t.beforeAfter.before} afterLabel={t.beforeAfter.after} />
           </div>
           <div style={{ position: "absolute", bottom: -18, left: -22, background: "var(--bg-1)", border: "1px solid var(--border-mid)", borderRadius: 14, padding: "12px 16px", boxShadow: "var(--sh-2)", display: "flex", alignItems: "center", gap: 10, animation: "ab-float 4s ease-in-out infinite" }}>
             <div style={{ width: 34, height: 34, borderRadius: 10, background: "var(--acc-soft)", color: "var(--acc)", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon name="sparkle-fill" size={17} /></div>
             <div>
-              <div style={{ fontSize: 13, fontWeight: 600 }}>+38% conversion</div>
-              <div className="ab-mono" style={{ color: "var(--t-3)", fontSize: 10 }}>avg. listing uplift</div>
+              <div style={{ fontSize: 13, fontWeight: 600 }}>{t.hero.conversion}</div>
+              <div className="ab-mono" style={{ color: "var(--t-3)", fontSize: 10 }}>{t.hero.conversionSub}</div>
             </div>
           </div>
         </div>

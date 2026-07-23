@@ -1,6 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import { getLocale } from "@/i18n/server";
+import { getDictionary } from "@/i18n";
+import { LocaleProvider } from "@/i18n/context";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
@@ -33,21 +36,28 @@ export const viewport: Viewport = {
 // Runs before paint to set the theme class and avoid a flash of the wrong theme.
 const themeScript = `(function(){try{var t=localStorage.getItem('theme');if(t==='dark'){document.documentElement.classList.add('dark');}}catch(e){}})();`;
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+  const dict = getDictionary(locale);
+
   return (
     <html
-      lang="en"
+      lang={locale}
       suppressHydrationWarning
       className={`${spaceGrotesk.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className="flex min-h-full flex-col overscroll-none">{children}</body>
+      <body className="flex min-h-full flex-col overscroll-none">
+        <LocaleProvider locale={locale} dict={dict}>
+          {children}
+        </LocaleProvider>
+      </body>
     </html>
   );
 }

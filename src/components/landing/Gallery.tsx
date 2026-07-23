@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Section, SectionHead } from "./ui";
+import { useDict } from "@/i18n/context";
 
 const ITEMS = [
   { h: 300, label: "Infographic", style: "Glass", tone: "oklch(0.34 0.07 200)", group: "Infographics" },
@@ -14,19 +15,20 @@ const ITEMS = [
   { h: 240, label: "Interior", style: "Minimal", tone: "oklch(0.3 0.04 200)", group: "Interiors" },
 ];
 
-const TABS = ["All", "Infographics", "Interiors", "Mockups", "Patterns"];
+const TABS = ["All", "Infographics", "Interiors", "Mockups", "Patterns"] as const;
 
 export default function Gallery() {
-  const [tab, setTab] = useState("All");
+  const [tab, setTab] = useState<(typeof TABS)[number]>("All");
+  const d = useDict();
   const shown = tab === "All" ? ITEMS : ITEMS.filter((i) => i.group === tab);
 
   return (
     <Section id="gallery">
       <div className="ab-gallery-head" style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 40 }}>
-        <SectionHead tag="Gallery" title="Made with Artboard" sub="Real outputs across every tool and style preset." />
+        <SectionHead tag={d.gallery.tag} title={d.gallery.title} sub={d.gallery.sub} />
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          {TABS.map((t) => (
-            <button key={t} onClick={() => setTab(t)} className={t === tab ? "ab-chip ab-chip-acc" : "ab-chip"} style={{ cursor: "pointer" }}>{t}</button>
+          {TABS.map((tk) => (
+            <button key={tk} onClick={() => setTab(tk)} className={tk === tab ? "ab-chip ab-chip-acc" : "ab-chip"} style={{ cursor: "pointer" }}>{d.gallery.tabs[tk]}</button>
           ))}
         </div>
       </div>
@@ -36,7 +38,7 @@ export default function Gallery() {
             <div style={{ height: it.h, background: it.tone, position: "relative" }}>
               <div style={{ position: "absolute", inset: 0, background: "repeating-linear-gradient(135deg, oklch(1 0 0 / 0.06) 0 1px, transparent 1px 10px)" }} />
               <div className="ab-glow" style={{ width: 160, height: 100, background: "oklch(1 0 0)", top: -40, right: -20, opacity: 0.06 }} />
-              <div style={{ position: "absolute", top: 12, left: 12, fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.06em", color: "oklch(1 0 0 / 0.85)", background: "oklch(0 0 0 / 0.4)", backdropFilter: "blur(8px)", padding: "4px 9px", borderRadius: 100 }}>{it.label.toUpperCase()}</div>
+              <div style={{ position: "absolute", top: 12, left: 12, fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.06em", color: "oklch(1 0 0 / 0.85)", background: "oklch(0 0 0 / 0.4)", backdropFilter: "blur(8px)", padding: "4px 9px", borderRadius: 100 }}>{(d.gallery.labels[it.label as keyof typeof d.gallery.labels] ?? it.label).toUpperCase()}</div>
               <div style={{ position: "absolute", bottom: 12, left: 12, display: "flex", alignItems: "center", gap: 6 }}>
                 <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--acc)" }} />
                 <span style={{ fontSize: 12, fontWeight: 600, color: "oklch(1 0 0 / 0.92)" }}>{it.style}</span>

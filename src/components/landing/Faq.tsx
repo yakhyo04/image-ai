@@ -2,14 +2,7 @@
 
 import { useState } from "react";
 import { Section, SectionHead, Icon } from "./ui";
-
-const FAQS = [
-  { q: "Do I need any design skills?", a: "None at all. Upload a product photo, pick a style preset, and Artboard handles composition, lighting, and text. You can fine-tune with a prompt if you want.", open: true },
-  { q: "Which marketplaces are supported?", a: "Exports come with size presets for Wildberries, Ozon, Uzum, Yandex Market, and more — including the exact pixel dimensions each platform requires." },
-  { q: "Can I generate text in Uzbek or Russian?", a: "Yes. On-image text can be generated in UZ, RU, or EN, and you can switch languages per generation without re-uploading." },
-  { q: "What about commercial rights?", a: "Pro and Business plans include a full commercial license. Everything you generate is yours to use in listings and ads." },
-  { q: "How do credits work?", a: "Each generation uses credits based on quality and tool. Unused monthly credits roll over for 30 days on paid plans." },
-];
+import { useDict } from "@/i18n/context";
 
 export function FaqItem({ q, a, defaultOpen = false }: { q: string; a: string; defaultOpen?: boolean }) {
   const [open, setOpen] = useState(defaultOpen);
@@ -29,16 +22,17 @@ export function FaqItem({ q, a, defaultOpen = false }: { q: string; a: string; d
 }
 
 export default function Faq() {
+  const t = useDict();
   return (
     <Section id="faq">
       <div className="ab-faq-grid" style={{ display: "grid", gridTemplateColumns: "0.8fr 1.2fr", gap: 64 }}>
         <div>
-          <SectionHead tag="FAQ" title="Questions, answered" />
-          <div className="ab-body" style={{ fontSize: 15, marginTop: 18 }}>Can’t find what you’re looking for?</div>
-          <button className="ab-btn ab-btn-ghost" style={{ marginTop: 16 }}><Icon name="send" size={15} /> Contact support</button>
+          <SectionHead tag={t.faq.tag} title={t.faq.title} />
+          <div className="ab-body" style={{ fontSize: 15, marginTop: 18 }}>{t.faq.contactPrompt}</div>
+          <button className="ab-btn ab-btn-ghost" style={{ marginTop: 16 }}><Icon name="send" size={15} /> {t.faq.contactBtn}</button>
         </div>
         <div>
-          {FAQS.map((f, i) => <FaqItem key={i} q={f.q} a={f.a} defaultOpen={f.open} />)}
+          {t.faq.items.map((f, i) => <FaqItem key={i} q={f.q} a={f.a} defaultOpen={i === 0} />)}
         </div>
       </div>
     </Section>

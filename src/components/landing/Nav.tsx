@@ -3,34 +3,36 @@
 import Link from "next/link";
 import { useState } from "react";
 import { ArtboardMark, Icon } from "./ui";
-
-const LINKS = [
-  { label: "Features", href: "/#features" },
-  { label: "Pricing", href: "/#pricing" },
-  { label: "Gallery", href: "/#gallery" },
-  { label: "Docs", href: "/#faq" },
-];
-
-const LANGS = ["UZ", "RU", "EN"] as const;
+import { useDict, useLocale } from "@/i18n/context";
+import { LOCALES, LOCALE_LABELS, LOCALE_COOKIE, type Locale } from "@/i18n/config";
 
 export function LangSwitch() {
-  const [lang, setLang] = useState<(typeof LANGS)[number]>("EN");
+  const active = useLocale();
+
+  function choose(l: Locale) {
+    if (l === active) return;
+    // Persist for a year and reload so both server and client components
+    // re-render in the chosen language.
+    document.cookie = `${LOCALE_COOKIE}=${l}; path=/; max-age=31536000; samesite=lax`;
+    window.location.reload();
+  }
+
   return (
     <div style={{ display: "inline-flex", alignItems: "center", gap: 2, padding: 3, background: "var(--bg-2)", border: "1px solid var(--border)", borderRadius: 100 }}>
       <Icon name="globe" size={15} style={{ color: "var(--t-3)", margin: "0 4px 0 6px" }} />
-      {LANGS.map((l) => (
+      {LOCALES.map((l) => (
         <button
           key={l}
-          onClick={() => setLang(l)}
+          onClick={() => choose(l)}
           style={{
             padding: "5px 11px", borderRadius: 100, border: "none", cursor: "pointer",
             fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 600, letterSpacing: "0.02em",
-            background: lang === l ? "var(--acc)" : "transparent",
-            color: lang === l ? "var(--acc-ink)" : "var(--t-3)",
+            background: active === l ? "var(--acc)" : "transparent",
+            color: active === l ? "var(--acc-ink)" : "var(--t-3)",
             transition: "all .15s ease",
           }}
         >
-          {l}
+          {LOCALE_LABELS[l]}
         </button>
       ))}
     </div>
@@ -39,6 +41,13 @@ export function LangSwitch() {
 
 export default function Nav({ authed = false }: { authed?: boolean }) {
   const [open, setOpen] = useState(false);
+  const t = useDict();
+  const LINKS = [
+    { label: t.nav.features, href: "/#features" },
+    { label: t.nav.pricing, href: "/#pricing" },
+    { label: t.nav.gallery, href: "/#gallery" },
+    { label: t.nav.docs, href: "/#faq" },
+  ];
   return (
     <header
       style={{
@@ -61,13 +70,13 @@ export default function Nav({ authed = false }: { authed?: boolean }) {
         <div className="ab-nav-actions">
           {authed ? (
             <Link href="/dashboard" className="ab-btn ab-btn-grad ab-btn-sm" style={{ padding: "10px 18px" }}>
-              Dashboard <Icon name="arrow-right" size={15} stroke={2.2} />
+              {t.nav.dashboard} <Icon name="arrow-right" size={15} stroke={2.2} />
             </Link>
           ) : (
             <>
-              <Link href="/login" className="ab-nav-link">Log in</Link>
+              <Link href="/login" className="ab-nav-link">{t.nav.login}</Link>
               <Link href="/signup" className="ab-btn ab-btn-grad ab-btn-sm" style={{ padding: "10px 18px" }}>
-                Get Started <Icon name="arrow-right" size={15} stroke={2.2} />
+                {t.nav.getStarted} <Icon name="arrow-right" size={15} stroke={2.2} />
               </Link>
             </>
           )}
@@ -93,11 +102,11 @@ export default function Nav({ authed = false }: { authed?: boolean }) {
           </nav>
           <div style={{ marginTop: 14, display: "flex", alignItems: "center", gap: 10 }}>
             {authed ? (
-              <Link href="/dashboard" onClick={() => setOpen(false)} className="ab-btn ab-btn-grad ab-btn-sm" style={{ flex: 1 }}>Dashboard</Link>
+              <Link href="/dashboard" onClick={() => setOpen(false)} className="ab-btn ab-btn-grad ab-btn-sm" style={{ flex: 1 }}>{t.nav.dashboard}</Link>
             ) : (
               <>
-                <Link href="/login" onClick={() => setOpen(false)} className="ab-btn ab-btn-ghost ab-btn-sm" style={{ flex: 1 }}>Log in</Link>
-                <Link href="/signup" onClick={() => setOpen(false)} className="ab-btn ab-btn-grad ab-btn-sm" style={{ flex: 1 }}>Get Started</Link>
+                <Link href="/login" onClick={() => setOpen(false)} className="ab-btn ab-btn-ghost ab-btn-sm" style={{ flex: 1 }}>{t.nav.login}</Link>
+                <Link href="/signup" onClick={() => setOpen(false)} className="ab-btn ab-btn-grad ab-btn-sm" style={{ flex: 1 }}>{t.nav.getStarted}</Link>
               </>
             )}
           </div>
