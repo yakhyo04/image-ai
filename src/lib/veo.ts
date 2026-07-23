@@ -1,15 +1,20 @@
 import { GenerateVideosOperation, GoogleGenAI } from "@google/genai";
 
-const apiKey = process.env.GEMINI_API_KEY;
-if (!apiKey) {
-  throw new Error("GEMINI_API_KEY is not set in environment");
+// Constructed lazily on first use so `next build` (which evaluates route
+// modules to collect page data) doesn't require GEMINI_API_KEY at build time —
+// it's only needed at runtime when a video request actually hits this client.
+let _ai: GoogleGenAI | null = null;
+function getAi(): GoogleGenAI {
+  if (!_ai) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new Error("GEMINI_API_KEY is not set in environment");
+    }
+    const useVertex = process.env.GEMINI_USE_VERTEX === "true";
+    _ai = new GoogleGenAI(useVertex ? { apiKey, vertexai: true } : { apiKey });
+  }
+  return _ai;
 }
-
-const useVertex = process.env.GEMINI_USE_VERTEX === "true";
-
-const ai = new GoogleGenAI(
-  useVertex ? { apiKey, vertexai: true } : { apiKey },
-);
 
 // Veo 3.1 (fast tier) — image-to-video with audio. This key only has access to
 // the Veo 3.1 family (veo-2.0 returns 404), so "fast" is the best quality/cost
@@ -44,7 +49,7 @@ type StartArgs = {
 // operation name. The job itself completes asynchronously (~1–3 min) and is
 // polled separately via pollVideo().
 export async function startProductVideo(args: StartArgs): Promise<string> {
-  const operation = await ai.models.generateVideos({
+  const operation = await getAi().models.generateVideos({
     model: VIDEO_MODEL,
     prompt: args.prompt?.trim() || DEFAULT_VIDEO_PROMPT,
     image: { imageBytes: args.imageBase64, mimeType: args.mimeType },
@@ -71,7 +76,7 @@ export async function pollVideo(name: string): Promise<PollResult> {
   // reconstruct one and set its name rather than passing a plain object.
   const operation = new GenerateVideosOperation();
   operation.name = name;
-  const op = await ai.operations.getVideosOperation({ operation });
+  const op = await getAi().operations.getVideosOperation({ operation });
 
   if (!op.done) return { status: "pending" };
 

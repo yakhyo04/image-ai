@@ -6,15 +6,34 @@ import {
   type InfographicLanguage,
 } from "./infographicStyles";
 
-const apiKey = process.env.OPENAI_API_KEY;
-if (!apiKey) {
-  throw new Error("OPENAI_API_KEY is not set in environment");
-}
-
 // OpenAI's GPT Image models. Image generation + editing both go through the
 // Images API (openai.images.edit), which accepts one or more reference images
 // plus a text prompt and returns a base64-encoded PNG.
-export const openai = new OpenAI({ apiKey });
+//
+// The client is constructed LAZILY on first use rather than at module load.
+// `next build` evaluates every route module to collect page data, so a
+// top-level `new OpenAI()` (or a throw on a missing key) would fail the build
+// even though the key is only needed at runtime. This proxy defers both the
+// key check and construction until an actual request touches the client.
+let _openai: OpenAI | null = null;
+function getOpenAI(): OpenAI {
+  if (!_openai) {
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      throw new Error("OPENAI_API_KEY is not set in environment");
+    }
+    _openai = new OpenAI({ apiKey });
+  }
+  return _openai;
+}
+
+export const openai = new Proxy({} as OpenAI, {
+  get(_target, prop, receiver) {
+    const client = getOpenAI();
+    const value = Reflect.get(client, prop, receiver);
+    return typeof value === "function" ? value.bind(client) : value;
+  },
+});
 
 // GPT Image 2 is the default. Override with OPENAI_IMAGE_MODEL in the
 // environment (e.g. "gpt-image-2-2026-04-21" or "gpt-image-1") if needed.
