@@ -4,7 +4,7 @@ import { updateSession } from "@/lib/supabase/proxy";
 const AUTH_PAGES = ["/login", "/signup", "/forgot-password"];
 
 function isProtected(pathname: string): boolean {
-  return pathname.startsWith("/dashboard");
+  return pathname.startsWith("/dashboard") || pathname.startsWith("/admin");
 }
 
 // Next 16 renamed `middleware` → `proxy`. Runs before render to refresh the
@@ -35,5 +35,5 @@ export const config = {
   // auth pages (to bounce signed-in users away). Public pages — the landing,
   // /tools/*, API routes — no longer pay a Supabase getUser() round-trip on
   // every request.
-  matcher: ["/dashboard/:path*", "/login", "/signup", "/forgot-password"],
+  matcher: ["/dashboard/:path*", "/admin/:path*", "/login", "/signup", "/forgot-password"],
 };
