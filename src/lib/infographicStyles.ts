@@ -53,7 +53,16 @@ export type InfographicStyle =
   | "aqua"
   | "sunny"
   | "cascade"
-  | "kicks";
+  | "kicks"
+  | "wipes"
+  | "insole"
+  | "tilewall"
+  | "laundry"
+  | "tactical"
+  | "hydro"
+  | "bulkpack"
+  | "trailtech"
+  | "multipack";
 
 export type InfographicStyleMeta = {
   id: InfographicStyle;
@@ -62,6 +71,51 @@ export type InfographicStyleMeta = {
 };
 
 export const INFOGRAPHIC_STYLE_META: InfographicStyleMeta[] = [
+  {
+    id: "wipes",
+    label: "wipes",
+    hint: "wipes",
+  },
+  {
+    id: "insole",
+    label: "insole",
+    hint: "insole",
+  },
+  {
+    id: "tilewall",
+    label: "tilewall",
+    hint: "tilewall",
+  },
+  {
+    id: "laundry",
+    label: "laundry",
+    hint: "laundry",
+  },
+  {
+    id: "tactical",
+    label: "tactical",
+    hint: "tactical",
+  },
+  {
+    id: "hydro",
+    label: "hydro",
+    hint: "hydro",
+  },
+  {
+    id: "bulkpack",
+    label: "bulkpack",
+    hint: "bulkpack",
+  },
+  {
+    id: "trailtech",
+    label: "trailtech",
+    hint: "trailtech",
+  },
+  {
+    id: "multipack",
+    label: "multipack",
+    hint: "multipack",
+  },
   {
     id: "kicks",
     label: "kicks",
